@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENSOR ARRAY v0.2 // FIELD TEST RIG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --phosphor: #00ff41;
+    --phosphor-dim: #00aa2a;
+    --phosphor-glow: #00ff4155;
+    --phosphor-faint: #003a0e;
+    --amber: #ffb300;
+    --amber-dim: #996a00;
+    --red-alert: #ff3333;
+    --fiber: #00cfff;
+    --fiber-dim: #006688;
+    --fiber-glow: #00cfff55;
+    --bg: #020a04;
+    --panel: #060f07;
+    --border: #00ff4133;
+    --scan-line: rgba(0,255,65,0.025);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--phosphor);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, var(--scan-line) 2px, var(--scan-line) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    height: 50px;
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    flex-shrink: 0;
+  }
+  .header-title { font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 16px var(--phosphor); }
+  .header-sub { font-size: 9px; color: var(--phosphor-dim); letter-spacing: 2px; margin-top: 1px; }
+  .status-bar { display: flex; gap: 18px; font-size: 9px; color: var(--phosphor-dim); align-items: center; }
+  .sdot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--phosphor); box-shadow: 0 0 6px var(--phosphor); animation: blink 1.3s ease-in-out infinite; margin-right: 4px; }
+  .sdot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation-delay: 0.4s; }
+  .sdot.fiber { background: var(--fiber); box-shadow: 0 0 6px var(--fiber); animation-delay: 0.8s; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+  /* ── LAYOUT ── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 300px 1fr 280px;
+    grid-template-rows: 1fr 200px;
+    height: calc(100vh - 50px);
+  }
+
+  /* ── PANELS ── */
+  .panel {
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .panel::-webkit-scrollbar { width: 3px; }
+  .panel::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .ptitle {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--phosphor-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+  }
+
+  /* ── CONFIG OPTIONS ── */
+  .csect { margin-bottom: 14px; }
+  .clabel { font-size: 9px; color: var(--phosphor-dim); letter-spacing: 2px; margin-bottom: 5px; }
+
+  .opt {
+    display: flex; align-items: flex-start; gap: 7px;
+    cursor: pointer; padding: 4px 5px;
+    border: 1px solid transparent;
+    transition: all 0.15s; margin-bottom: 4px;
+  }
+  .opt:hover { border-color: var(--border); background: var(--phosphor-faint); }
+  .opt.active { border-color: var(--phosphor-dim); background: var(--phosphor-faint); }
+  .opt.fiber-opt.active { border-color: var(--fiber-dim); background: #001a22; }
+
+  .oind {
+    width: 9px; height: 9px; border: 1px solid var(--phosphor-dim);
+    flex-shrink: 0; margin-top: 2px; position: relative;
+  }
+  .opt.active .oind::after {
+    content: ''; position: absolute; inset: 2px;
+    background: var(--phosphor); box-shadow: 0 0 4px var(--phosphor);
+  }
+  .opt.fiber-opt.active .oind { border-color: var(--fiber-dim); }
+  .opt.fiber-opt.active .oind::after { background: var(--fiber); box-shadow: 0 0 4px var(--fiber); }
+
+  .otxt { font-size: 10px; line-height: 1.35; }
+  .ospec { font-size: 9px; color: var(--phosphor-dim); }
+  .fiber-opt .otxt { color: var(--fiber); }
+  .fiber-opt .ospec { color: var(--fiber-dim); }
+
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 2px;
+    background: var(--border); outline: none; margin: 6px 0 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 11px; height: 11px;
+    background: var(--phosphor); box-shadow: 0 0 5px var(--phosphor); cursor: pointer;
+  }
+  .rout { display: flex; justify-content: space-between; font-size: 9px; color: var(--phosphor-dim); }
+  .rval { font-size: 13px; color: var(--phosphor); text-shadow: 0 0 6px var(--phosphor); }
+
+  .btn {
+    background: transparent; border: 1px solid var(--phosphor-dim);
+    color: var(--phosphor); font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px; padding: 6px 10px;
+    cursor: pointer; text-transform: uppercase; transition: all 0.15s;
+    width: 100%; margin-bottom: 5px;
+  }
+  .btn:hover { background: var(--phosphor-faint); border-color: var(--phosphor); box-shadow: 0 0 8px var(--phosphor-glow); text-shadow: 0 0 6px var(--phosphor); }
+  .btn.fiber { border-color: var(--fiber-dim); color: var(--fiber); }
+  .btn.fiber:hover { background: #001a22; border-color: var(--fiber); box-shadow: 0 0 8px var(--fiber-glow); text-shadow: 0 0 6px var(--fiber); }
+  .btn.danger { border-color: var(--red-alert); color: var(--red-alert); }
+  .btn.danger:hover { background: #1a0000; }
+  .btn-row { display: flex; gap: 5px; }
+  .btn-row .btn { margin-bottom: 0; }
+
+  /* ── CENTER VIZ ── */
+  .viz-panel {
+    grid-column: 2; grid-row: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 16px; position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .viz-title { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 3px; color: var(--phosphor-dim); margin-bottom: 10px; align-self: flex-start; }
+  #arrayDiagram { width: 100%; max-width: 440px; height: 440px; }
+
+  /* ── OSCILLOSCOPE PANEL (bottom center) ── */
+  .scope-panel {
+    grid-column: 2; grid-row: 2;
+    background: #000508;
+    border-right: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .scope-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .scope-title { font-family: 'Orbitron', monospace; font-size: 9px; letter-spacing: 3px; color: var(--fiber-dim); }
+  .scope-meta { font-size: 9px; color: var(--fiber-dim); display: flex; gap: 14px; }
+  .scope-val { color: var(--fiber); }
+
+  #scopeCanvas {
+    width: 100%; flex: 1;
+    display: block;
+    border: 1px solid #00cfff22;
+    background: #000508;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .spec-block {
+    background: #000; border: 1px solid var(--border);
+    padding: 8px 10px; margin-bottom: 10px;
+    font-size: 10px; line-height: 1.9;
+  }
+  .spec-block.fiber-block { border-color: var(--fiber-dim); background: #000508; }
+  .sk { color: var(--phosphor-dim); }
+  .sv { color: var(--phosphor); }
+  .sf { color: var(--fiber); }
+  .sa { color: var(--amber); }
+
+  .chain {
+    display: flex; flex-direction: column; gap: 0;
+    margin: 6px 0;
+  }
+  .chain-node {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; padding: 4px 8px;
+    border-left: 2px solid var(--fiber-dim);
+    margin-left: 8px;
+    position: relative;
+  }
+  .chain-node::before {
+    content: ''; position: absolute; left: -5px; top: 50%;
+    transform: translateY(-50%);
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--fiber); box-shadow: 0 0 4px var(--fiber);
+  }
+  .chain-node:last-child { border-left-color: transparent; }
+  .cn-label { color: var(--fiber); font-size: 10px; }
+  .cn-spec { color: var(--fiber-dim); font-size: 9px; }
+
+  .gpio-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+  .gpio-table td { padding: 2px 5px; border: 1px solid var(--border); }
+  .gpio-table tr:nth-child(odd) td { background: var(--phosphor-faint); }
+  .gpio-table .pin { color: var(--amber); }
+  .gpio-table .sig { color: var(--phosphor); }
+  .gpio-table .desc { color: var(--phosphor-dim); }
+
+  /* ── LOG (bottom left) ── */
+  .log-panel {
+    grid-column: 1; grid-row: 2;
+    background: #000; padding: 8px 10px;
+    overflow-y: auto; font-size: 9px;
+    border-right: 1px solid var(--border);
+  }
+  .log-panel::-webkit-scrollbar { width: 3px; }
+  .log-panel::-webkit-scrollbar-thumb { background: var(--border); }
+  .ll { margin-bottom: 2px; line-height: 1.5; }
+  .ll.hit { color: var(--amber); }
+  .ll.alert { color: var(--red-alert); }
+  .ll.sys { color: var(--phosphor-dim); }
+  .ll.fiber { color: var(--fiber); }
+
+  /* ── BOTTOM RIGHT ── */
+  .br-panel {
+    grid-column: 3; grid-row: 2;
+    padding: 8px 10px; overflow-y: auto;
+    font-size: 9px;
+  }
+
+  .badge { text-align: center; font-size: 9px; color: var(--phosphor-dim); letter-spacing: 1px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">SENSOR ARRAY // FIELD TEST RIG</div>
+    <div class="header-sub">PASSIVE DEFEAT LAYER — IMPACT + OPTICAL FLASH DETECTION // v0.2</div>
+  </div>
+  <div class="status-bar">
+    <span><span class="sdot"></span>MECH LAYER</span>
+    <span><span class="sdot fiber"></span>FIBER/OPTICAL</span>
+    <span><span class="sdot amber"></span>SCOPE LIVE</span>
+    <span id="hdrSensors">SENSORS: 0</span>
+    <span id="hdrEvents">EVENTS: 0</span>
+  </div>
+</div>
+
+<div class="workspace">
+
+  <!-- ── LEFT CONFIG ── -->
+  <div class="panel" style="grid-column:1; grid-row:1;">
+    <div class="ptitle">// LAYER CONFIG</div>
+
+    <div class="csect">
+      <div class="clabel">LAYER 1 — OUTER MESH</div>
+      <div class="opt active" data-layer="mesh" data-type="braid" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">Steel Braided Cable Tufts</div><div class="ospec">PVDF piezo woven in // ~10μs</div></div>
+      </div>
+      <div class="opt" data-layer="mesh" data-type="net" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">Hex Cage Netting</div><div class="ospec">Fiber optic woven // nanosecond</div></div>
+      </div>
+      <div class="opt" data-layer="mesh" data-type="both" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">Hybrid: Braid + Net</div><div class="ospec">Redundant // best coverage</div></div>
+      </div>
+    </div>
+
+    <div class="csect">
+      <div class="clabel">LAYER 2 — POLE TIP SENSORS</div>
+      <div class="opt active" data-layer="pole" data-type="pvdf" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">PVDF Piezo Film</div><div class="ospec">Flex voltage spike // self-powered</div></div>
+      </div>
+      <div class="opt" data-layer="pole" data-type="fsr" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">FSR Pressure Sensor</div><div class="ospec">1–5ms // resistive divider</div></div>
+      </div>
+      <div class="opt" data-layer="pole" data-type="laser" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">IR Laser Break-Beam</div><div class="ospec">PIN photodiode // nanosecond</div></div>
+      </div>
+    </div>
+
+    <div class="csect">
+      <div class="clabel" style="color: var(--fiber);">LAYER 3 — FIBER OPTIC BURST DISCS 💡</div>
+      <div class="opt fiber-opt active" data-layer="fiber" data-type="on" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">Enabled — Woven in mesh strands</div><div class="ospec">Flash/blast optical trigger // EMP immune</div></div>
+      </div>
+      <div class="opt fiber-opt" data-layer="fiber" data-type="off" onclick="sel(this)">
+        <div class="oind"></div>
+        <div><div class="otxt">Disabled</div><div class="ospec">Mechanical layers only</div></div>
+      </div>
+    </div>
+
+    <div class="csect">
+      <div class="clabel">POLE COUNT (PER SIDE)</div>
+      <input type="range" id="poleCount" min="4" max="16" value="8" oninput="updatePoles(this.value)">
+      <div class="rout"><span>4</span><span class="rval" id="poleVal">8</span><span>16</span></div>
+    </div>
+
+    <div class="csect">
+      <div class="clabel">STANDOFF DISTANCE (cm)</div>
+      <input type="range" id="standoff" min="10" max="80" value="30" oninput="updateStandoff(this.value)">
+      <div class="rout"><span>10cm</span><span class="rval" id="standoffVal">30cm</span><span>80cm</span></div>
+    </div>
+
+    <div class="csect">
+      <div class="btn-row">
+        <button class="btn" onclick="simHit('random')">⚡ SIM HIT</button>
+        <button class="btn" onclick="simHit('sweep')">↗ SWEEP</button>
+      </div>
+      <button class="btn fiber" style="margin-top:5px;" onclick="simFlash()">💡 SIM FLASH EVENT</button>
+      <button class="btn danger" style="margin-top:5px;" onclick="clearAll()">✕ CLEAR ALL</button>
+    </div>
+  </div>
+
+  <!-- ── CENTER VIZ ── -->
+  <div class="viz-panel">
+    <div class="viz-title">// ARRAY TOPOLOGY — TOP-DOWN VIEW</div>
+    <svg id="arrayDiagram" viewBox="0 0 440 440">
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="sglow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="fglow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+
+      <!-- Grid -->
+      <g stroke="#00ff4108" stroke-width="0.5">
+        <line x1="0" y1="44" x2="440" y2="44"/><line x1="0" y1="88" x2="440" y2="88"/>
+        <line x1="0" y1="132" x2="440" y2="132"/><line x1="0" y1="176" x2="440" y2="176"/>
+        <line x1="0" y1="220" x2="440" y2="220"/><line x1="0" y1="264" x2="440" y2="264"/>
+        <line x1="0" y1="308" x2="440" y2="308"/><line x1="0" y1="352" x2="440" y2="352"/>
+        <line x1="0" y1="396" x2="440" y2="396"/>
+        <line x1="44" y1="0" x2="44" y2="440"/><line x1="88" y1="0" x2="88" y2="440"/>
+        <line x1="132" y1="0" x2="132" y2="440"/><line x1="176" y1="0" x2="176" y2="440"/>
+        <line x1="220" y1="0" x2="220" y2="440"/><line x1="264" y1="0" x2="264" y2="440"/>
+        <line x1="308" y1="0" x2="308" y2="440"/><line x1="352" y1="0" x2="352" y2="440"/>
+        <line x1="396" y1="0" x2="396" y2="440"/>
+      </g>
+
+      <!-- Compass -->
+      <text x="220" y="16" text-anchor="middle" fill="#00ff4155" font-family="Share Tech Mono" font-size="9" letter-spacing="2">N</text>
+      <text x="220" y="434" text-anchor="middle" fill="#00ff4155" font-family="Share Tech Mono" font-size="9" letter-spacing="2">S</text>
+      <text x="10" y="224" fill="#00ff4155" font-family="Share Tech Mono" font-size="9" letter-spacing="2">W</text>
+      <text x="428" y="224" fill="#00ff4155" font-family="Share Tech Mono" font-size="9" letter-spacing="2">E</text>
+
+      <!-- Fiber optic ring (outer, cyan) -->
+      <ellipse id="fiberRing" cx="220" cy="220" rx="175" ry="135"
+        fill="none" stroke="#00cfff33" stroke-width="2" stroke-dasharray="6 3" filter="url(#fglow)"/>
+
+      <!-- Mesh ring -->
+      <ellipse id="meshRing" cx="220" cy="220" rx="155" ry="120"
+        fill="none" stroke="#00ff4133" stroke-width="1.5" stroke-dasharray="4 3" filter="url(#glow)"/>
+
+      <!-- Vehicle -->
+      <rect x="155" y="175" width="130" height="90" rx="7"
+        fill="#020a04" stroke="#00ff41" stroke-width="1.8" filter="url(#glow)"/>
+      <line x1="155" y1="220" x2="285" y2="220" stroke="#00ff4122" stroke-width="1"/>
+      <rect x="168" y="183" width="42" height="28" rx="3" fill="none" stroke="#00ff4122" stroke-width="0.7"/>
+      <rect x="230" y="183" width="42" height="28" rx="3" fill="none" stroke="#00ff4122" stroke-width="0.7"/>
+      <text x="220" y="238" text-anchor="middle" fill="#00ff4166" font-family="Share Tech Mono" font-size="8" letter-spacing="1">VEHICLE</text>
+
+      <!-- Dynamic groups -->
+      <g id="poleGroup"></g>
+      <g id="fiberNodes"></g>
+      <g id="hitLayer" opacity="0"></g>
+      <g id="flashLayer" opacity="0"></g>
+    </svg>
+  </div>
+
+  <!-- ── RIGHT SPECS ── -->
+  <div class="panel" style="grid-column:3; grid-row:1; border-right:none;">
+    <div class="ptitle">// SENSOR SPECS</div>
+
+    <div class="spec-block">
+      <div><span class="sk">MECH SENSOR: </span><span class="sv" id="specType">PVDF PIEZO FILM</span></div>
+      <div><span class="sk">RESPONSE: </span><span class="sv" id="specResp">~10 microseconds</span></div>
+      <div><span class="sk">COST: </span><span class="sv" id="specCost">$0.50–$2.00 ea</span></div>
+      <div><span class="sk">POWER: </span><span class="sv" id="specPower">Self-generating</span></div>
+      <div><span class="sa" id="specNotes">Voltage spike on flex. No power at sensor point.</span></div>
+    </div>
+
+    <div class="ptitle">// FIBER OPTIC BURST DISC CHAIN</div>
+    <div class="spec-block fiber-block">
+      <div><span class="sk">TYPE: </span><span class="sf">Plastic/glass multimode fiber</span></div>
+      <div><span class="sk">TRIGGER: </span><span class="sf">Flash, blast overpressure, burst disc pop</span></div>
+      <div><span class="sk">RESPONSE: </span><span class="sf">Sub-nanosecond (speed of light)</span></div>
+      <div><span class="sk">EMP: </span><span class="sf">Fully immune — glass only at sensor end</span></div>
+      <div><span class="sk">COST: </span><span class="sf">~$0.10/m plastic fiber // $2 photodiode</span></div>
+    </div>
+
+    <div class="clabel" style="color:var(--fiber); margin-bottom:6px;">SIGNAL CHAIN</div>
+    <div class="chain">
+      <div class="chain-node">
+        <div><div class="cn-label">Flash / Blast Event</div><div class="cn-spec">Explosion, near-miss, FPV impact</div></div>
+      </div>
+      <div class="chain-node">
+        <div><div class="cn-label">Fiber Optic Strand in Mesh</div><div class="cn-spec">No electronics here — pure glass/plastic</div></div>
+      </div>
+      <div class="chain-node">
+        <div><div class="cn-label">Burst Disc (optional)</div><div class="cn-spec">Overpressure pops disc → fiber bends → signal</div></div>
+      </div>
+      <div class="chain-node">
+        <div><div class="cn-label">PIN Photodiode + TIA Amp</div><div class="cn-spec">Shielded box // converts light pulse → voltage</div></div>
+      </div>
+      <div class="chain-node">
+        <div><div class="cn-label">RPi / Arduino ADC</div><div class="cn-spec">Timestamps event in nanoseconds</div></div>
+      </div>
+      <div class="chain-node">
+        <div><div class="cn-label">Oscilloscope Display ↓</div><div class="cn-spec">Waveform + angle + intensity logged</div></div>
+      </div>
+    </div>
+
+    <div class="ptitle" style="margin-top:10px;">// VELOCITY CALC</div>
+    <div class="spec-block" style="font-size:10px; line-height:1.9;">
+      <div><span class="sk">V = D / Δt</span></div>
+      <div><span class="sk">D=</span><span class="sv">plane separation (m)</span></div>
+      <div><span class="sk">Δt=</span><span class="sv">trigger delta (μs)</span></div>
+      <div><span class="sk">Angle=</span><span class="sv">atan2(Δy, Δx) from pole seq</span></div>
+    </div>
+
+    <div class="badge">🇺🇦 SLAVA UKRAINI // OPEN SOURCE // FREE TO USE</div>
+  </div>
+
+  <!-- ── BOTTOM LEFT: LOG ── -->
+  <div class="log-panel">
+    <div style="font-family:'Orbitron',monospace; font-size:8px; letter-spacing:2px; color:var(--phosphor-dim); margin-bottom:5px; border-bottom:1px solid var(--border); padding-bottom:4px;">// EVENT LOG</div>
+    <div id="eventLog">
+      <div class="ll sys">> SYS INIT // SENSOR ARRAY FIELD TEST RIG v0.2</div>
+      <div class="ll sys">> FIBER OPTIC BURST DISC LAYER: ENABLED</div>
+      <div class="ll sys">> CONFIGURE LAYERS LEFT // SIM EVENTS TO TEST</div>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM CENTER: SCOPE ── -->
+  <div class="scope-panel">
+    <div class="scope-header">
+      <div class="scope-title">// OPTICAL WAVEFORM — FIBER BURST DISC CAPTURE</div>
+      <div class="scope-meta">
+        <span>TIMEBASE: <span class="scope-val" id="scopeTimebase">500ns/div</span></span>
+        <span>AMPLITUDE: <span class="scope-val" id="scopeAmp">—</span></span>
+        <span>CHANNELS: <span class="scope-val" id="scopeChannels">0 active</span></span>
+      </div>
+    </div>
+    <canvas id="scopeCanvas"></canvas>
+  </div>
+
+  <!-- ── BOTTOM RIGHT: PYTHON ── -->
+  <div class="br-panel" style="border-right:none;">
+    <div class="ptitle">// PYTHON LOGGER</div>
+    <div style="background:#000; border:1px solid #00cfff22; padding:8px; font-size:9px; color:#00cc33; line-height:1.7;">
+      <div style="color:#00ff4144"># fiber_logger.py // RPi</div>
+      <div>import RPi.GPIO as GPIO</div>
+      <div>import time, json</div>
+      <div>&nbsp;</div>
+      <div style="color:#00ff4144"># Mech poles + fiber channels</div>
+      <div>POLES = [4,5,6,7,8,9,10,11]</div>
+      <div>FIBER = [17,18,19,20]</div>
+      <div>events = []</div>
+      <div>&nbsp;</div>
+      <div>def on_mech(ch):</div>
+      <div>&nbsp;&nbsp;t = time.time_ns()</div>
+      <div>&nbsp;&nbsp;events.append(</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;{"type":"MECH","pin":ch,"t":t})</div>
+      <div>&nbsp;</div>
+      <div>def on_flash(ch):</div>
+      <div>&nbsp;&nbsp;t = time.time_ns()</div>
+      <div>&nbsp;&nbsp;events.append(</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;{"type":"FLASH","ch":ch,"t":t})</div>
+      <div>&nbsp;&nbsp;print(f"💡FLASH ch{ch}@{t}")</div>
+      <div>&nbsp;</div>
+      <div>for p in POLES:</div>
+      <div>&nbsp;&nbsp;GPIO.setup(p,GPIO.IN)</div>
+      <div>&nbsp;&nbsp;GPIO.add_event_detect(p,</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;GPIO.RISING,on_mech,1)</div>
+      <div>for f in FIBER:</div>
+      <div>&nbsp;&nbsp;GPIO.setup(f,GPIO.IN)</div>
+      <div>&nbsp;&nbsp;GPIO.add_event_detect(f,</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;GPIO.RISING,on_flash,1)</div>
+      <div>&nbsp;</div>
+      <div style="color:#00ff4144"># Saves JSON on exit</div>
+      <div>GPIO.wait_for_edge(</div>
+      <div>&nbsp;&nbsp;POLES[0],GPIO.RISING)</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──
+const S = {
+  poleCount: 8, standoff: 30,
+  mesh: 'braid', pole: 'pvdf', fiber: 'on', ctrl: 'rpi',
+  hitCount: 0, flashCount: 0,
+  scopeWaves: [],        // array of waveform arrays
+  scopeColors: [],
+  maxWaves: 4,
+  sweepTimer: null
+};
+
+const SPECS = {
+  pvdf: { type:'PVDF PIEZO FILM', resp:'~10 microseconds', cost:'$0.50–$2.00 ea', power:'Self-generating', notes:'Voltage spike on flex. No power at sensor point.' },
+  fsr:  { type:'FSR FORCE RESISTOR', resp:'1–5 milliseconds', cost:'$1–$4 ea', power:'3.3V required', notes:'Good for pressure confirmation. Slower — use as secondary layer.' },
+  laser:{ type:'IR LASER BREAK-BEAM', resp:'~nanoseconds', cost:'$2–$8 per pair', power:'5V emitter / 3.3V detect', notes:'Fastest mech option. Two planes = velocity. Three planes = angle.' }
+};
+
+// ── SCOPE SETUP ──
+const canvas = document.getElementById('scopeCanvas');
+const ctx = canvas.getContext('2d');
+let scopeW, scopeH;
+
+function resizeScope() {
+  scopeW = canvas.offsetWidth;
+  scopeH = canvas.offsetHeight;
+  canvas.width = scopeW;
+  canvas.height = scopeH;
+  drawScope();
+}
+
+function drawScope() {
+  if (!scopeW) return;
+  ctx.clearRect(0, 0, scopeW, scopeH);
+
+  // Background
+  ctx.fillStyle = '#000508';
+  ctx.fillRect(0, 0, scopeW, scopeH);
+
+  // Grid
+  ctx.strokeStyle = '#00cfff0a';
+  ctx.lineWidth = 0.5;
+  const cols = 10, rows = 4;
+  for (let i = 0; i <= cols; i++) {
+    const x = (i / cols) * scopeW;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, scopeH); ctx.stroke();
+  }
+  for (let i = 0; i <= rows; i++) {
+    const y = (i / rows) * scopeH;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(scopeW, y); ctx.stroke();
+  }
+
+  // Center baseline
+  ctx.strokeStyle = '#00cfff22';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, scopeH * 0.5); ctx.lineTo(scopeW, scopeH * 0.5); ctx.stroke();
+
+  // Waves
+  S.scopeWaves.forEach((wave, wi) => {
+    if (!wave || wave.length < 2) return;
+    const color = S.scopeColors[wi] || '#00cfff';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.shadowBlur = 6;
+    ctx.shadowColor = color;
+    ctx.beginPath();
+    wave.forEach((v, i) => {
+      const x = (i / (wave.length - 1)) * scopeW;
+      const y = scopeH * 0.5 - v * scopeH * 0.42;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+
+  // "No signal" text
+  if (S.scopeWaves.length === 0) {
+    ctx.fillStyle = '#00cfff22';
+    ctx.font = '10px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('NO SIGNAL — SIM FLASH EVENT TO CAPTURE', scopeW / 2, scopeH / 2 + 4);
+    ctx.textAlign = 'left';
+  }
+
+  // Trigger marker
+  if (S.scopeWaves.length > 0) {
+    ctx.strokeStyle = '#ffb30066';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(0, scopeH * 0.1); ctx.lineTo(scopeW, scopeH * 0.1); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffb300';
+    ctx.font = '8px Share Tech Mono';
+    ctx.fillText('TRIG', 4, scopeH * 0.1 - 2);
+  }
+}
+
+// ── GENERATE FLASH WAVEFORM ──
+function generateFlashWave(intensity, rise, decay) {
+  const pts = 200;
+  const wave = [];
+  const peakAt = Math.floor(pts * 0.08);
+  for (let i = 0; i < pts; i++) {
+    if (i < peakAt) {
+      wave.push((i / peakAt) * intensity);
+    } else {
+      const t = (i - peakAt) / (pts - peakAt);
+      wave.push(intensity * Math.exp(-t * decay) * (1 + Math.sin(t * 40 * rise) * 0.06));
+    }
+  }
+  return wave;
+}
+
+const WAVE_COLORS = ['#00cfff', '#00ff99', '#ffb300', '#ff6666'];
+
+function simFlash() {
+  const intensity = 0.4 + Math.random() * 0.55;
+  const rise = 0.5 + Math.random() * 1.5;
+  const decay = 3 + Math.random() * 8;
+  const wave = generateFlashWave(intensity, rise, decay);
+
+  if (S.scopeWaves.length >= S.maxWaves) {
+    S.scopeWaves.shift(); S.scopeColors.shift();
+  }
+  S.scopeWaves.push(wave);
+  S.scopeColors.push(WAVE_COLORS[S.scopeWaves.length - 1]);
+
+  S.flashCount++;
+  document.getElementById('scopeChannels').textContent = `${S.scopeWaves.length} active`;
+  document.getElementById('scopeAmp').textContent = (intensity * 3.3).toFixed(2) + 'V pk';
+  drawScope();
+
+  // Flash the fiber ring
+  const fr = document.getElementById('fiberRing');
+  fr.setAttribute('stroke', '#00cfff');
+  fr.setAttribute('stroke-width', '3');
+  setTimeout(() => {
+    fr.setAttribute('stroke', '#00cfff33');
+    fr.setAttribute('stroke-width', '2');
+  }, 350);
+
+  // Flash the fiber nodes
+  document.querySelectorAll('.fiber-node').forEach(n => {
+    n.setAttribute('fill', '#00cfff');
+    setTimeout(() => n.setAttribute('fill', '#000508'), 400);
+  });
+
+  // Random approach angle flash
+  const angle = Math.random() * 360;
+  const rad = angle * Math.PI / 180;
+  const cx = 220, cy = 220;
+  const rx = parseFloat(document.getElementById('fiberRing').getAttribute('rx'));
+  const ry = parseFloat(document.getElementById('fiberRing').getAttribute('ry'));
+  const fx = cx + rx * Math.cos(rad);
+  const fy = cy + ry * Math.sin(rad);
+
+  const fl = document.getElementById('flashLayer');
+  fl.innerHTML = '';
+  fl.setAttribute('opacity', '1');
+
+  // Flash burst circle
+  const burst = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  burst.setAttribute('cx', fx); burst.setAttribute('cy', fy);
+  burst.setAttribute('r', '14');
+  burst.setAttribute('fill', '#00cfff44'); burst.setAttribute('stroke', '#00cfff');
+  burst.setAttribute('stroke-width', '1.5'); burst.setAttribute('filter', 'url(#sglow)');
+  fl.appendChild(burst);
+
+  // Radial lines
+  for (let a = 0; a < 360; a += 45) {
+    const lr = a * Math.PI / 180;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', fx); line.setAttribute('y1', fy);
+    line.setAttribute('x2', fx + Math.cos(lr) * 20); line.setAttribute('y2', fy + Math.sin(lr) * 20);
+    line.setAttribute('stroke', '#00cfff88'); line.setAttribute('stroke-width', '1');
+    fl.appendChild(line);
+  }
+
+  // Fiber trace from flash point to vehicle
+  const trace = document.createElementNS('http://www.w3.org/2000/svg','line');
+  trace.setAttribute('x1', fx); trace.setAttribute('y1', fy);
+  trace.setAttribute('x2', cx); trace.setAttribute('y2', cy);
+  trace.setAttribute('stroke', '#00cfff55'); trace.setAttribute('stroke-width', '1');
+  trace.setAttribute('stroke-dasharray', '3 2'); trace.setAttribute('filter', 'url(#fglow)');
+  fl.appendChild(trace);
+
+  setTimeout(() => { fl.setAttribute('opacity','0'); fl.innerHTML=''; }, 1000);
+
+  S.hitCount++;
+  document.getElementById('hdrEvents').textContent = `EVENTS: ${S.hitCount}`;
+
+  const dirLabel = getDirLabel(angle);
+  addLog(`💡 FLASH // AZ:${angle.toFixed(1)}° (${dirLabel}) // PEAK:${(intensity*3.3).toFixed(2)}V // FIBER CH${S.scopeWaves.length}`, 'fiber');
+  addLog(`   SCOPE: ${S.scopeWaves.length}/${S.maxWaves} channels // decay τ=${(1/decay*1000).toFixed(0)}ns`, 'fiber');
+}
+
+// ── MECHANICAL HIT SIM ──
+function simHit(mode) {
+  if (S.sweepTimer) { clearInterval(S.sweepTimer); S.sweepTimer = null; }
+  if (mode === 'random') { doMechHit(); }
+  else {
+    let a = 0;
+    S.sweepTimer = setInterval(() => {
+      doMechHit(a); a += 18;
+      if (a >= 360) { clearInterval(S.sweepTimer); S.sweepTimer = null; }
+    }, 150);
+  }
+}
+
+function doMechHit(forcedAngle) {
+  const angle = forcedAngle !== undefined ? forcedAngle : Math.random() * 360;
+  const rad = angle * Math.PI / 180;
+  const cx = 220, cy = 220;
+  const rx = parseFloat(document.getElementById('meshRing').getAttribute('rx'));
+  const ry = parseFloat(document.getElementById('meshRing').getAttribute('ry'));
+  const hx = cx + rx * Math.cos(rad);
+  const hy = cy + ry * Math.sin(rad);
+
+  // Find nearest pole
+  const poles = document.querySelectorAll('.pole-sensor');
+  let nearest = null, nearDist = Infinity;
+  poles.forEach(p => {
+    const d = Math.hypot(parseFloat(p.getAttribute('cx')) - hx, parseFloat(p.getAttribute('cy')) - hy);
+    if (d < nearDist) { nearDist = d; nearest = p; }
+  });
+
+  if (nearest) {
+    nearest.setAttribute('fill', '#00ff41');
+    nearest.setAttribute('stroke', '#ffffff');
+    setTimeout(() => { nearest.setAttribute('fill','#020a04'); nearest.setAttribute('stroke','#00ff41'); }, 350);
+  }
+
+  const hl = document.getElementById('hitLayer');
+  hl.innerHTML = ''; hl.setAttribute('opacity','1');
+
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',hx); c.setAttribute('cy',hy); c.setAttribute('r','7');
+  c.setAttribute('fill','#ff330033'); c.setAttribute('stroke','#ff3333');
+  c.setAttribute('stroke-width','1.8'); c.setAttribute('filter','url(#sglow)');
+  hl.appendChild(c);
+
+  const fromX = cx + (rx + 50) * Math.cos(rad);
+  const fromY = cy + (ry + 50) * Math.sin(rad);
+  const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',fromX); ln.setAttribute('y1',fromY);
+  ln.setAttribute('x2',hx); ln.setAttribute('y2',hy);
+  ln.setAttribute('stroke','#ff333377'); ln.setAttribute('stroke-width','1.2');
+  ln.setAttribute('stroke-dasharray','4 2');
+  hl.appendChild(ln);
+  setTimeout(() => { hl.setAttribute('opacity','0'); hl.innerHTML=''; }, 1000);
+
+  S.hitCount++;
+  document.getElementById('hdrEvents').textContent = `EVENTS: ${S.hitCount}`;
+  const vel = (40 + Math.random()*160).toFixed(0);
+  const dir = getDirLabel(angle);
+  addLog(`⚡ MECH HIT // AZ:${angle.toFixed(1)}° (${dir}) // ~${vel}m/s // SENSOR:${nearest?nearest.getAttribute('data-id'):'?'}`, 'hit');
+  if (nearDist < 18) addLog(`  ⚠ DIRECT POLE CONTACT`, 'alert');
+}
+
+// ── DIAGRAM UPDATE ──
+function updateDiagram() {
+  const poles = S.poleCount;
+  const so = S.standoff;
+  const rx = 100 + (so - 30) * 1.0;
+  const ry = 78 + (so - 30) * 0.75;
+  const frx = rx + 20, fry = ry + 15;
+
+  document.getElementById('meshRing').setAttribute('rx', rx);
+  document.getElementById('meshRing').setAttribute('ry', ry);
+  document.getElementById('fiberRing').setAttribute('rx', frx);
+  document.getElementById('fiberRing').setAttribute('ry', fry);
+  document.getElementById('fiberRing').setAttribute('opacity', S.fiber === 'on' ? '1' : '0.1');
+
+  const g = document.getElementById('poleGroup');
+  g.innerHTML = '';
+  const fn = document.getElementById('fiberNodes');
+  fn.innerHTML = '';
+
+  const cx = 220, cy = 220;
+  const totalPoles = poles * 4;
+  document.getElementById('hdrSensors').textContent = `SENSORS: ${totalPoles + (S.fiber === 'on' ? 8 : 0)}`;
+
+  const sides = [
+    { axis:'x', fixed:cy-ry, range:[cx-rx*0.72, cx+rx*0.72], dir:'N' },
+    { axis:'x', fixed:cy+ry, range:[cx-rx*0.72, cx+rx*0.72], dir:'S' },
+    { axis:'y', fixed:cx-rx, range:[cy-ry*0.72, cy+ry*0.72], dir:'W' },
+    { axis:'y', fixed:cx+rx, range:[cy-ry*0.72, cy+ry*0.72], dir:'E' },
+  ];
+
+  sides.forEach(side => {
+    for (let i = 0; i < poles; i++) {
+      const t = poles === 1 ? 0.5 : i / (poles - 1);
+      const pos = side.range[0] + t * (side.range[1] - side.range[0]);
+      const px = side.axis === 'x' ? pos : side.fixed;
+      const py = side.axis === 'x' ? side.fixed : pos;
+      const ex = side.axis === 'x' ? pos : (side.dir === 'W' ? 155 : 285);
+      const ey = side.axis === 'x' ? (side.dir === 'N' ? 175 : 265) : pos;
+
+      const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',ex); ln.setAttribute('y1',ey);
+      ln.setAttribute('x2',px); ln.setAttribute('y2',py);
+      ln.setAttribute('stroke','#00ff4115'); ln.setAttribute('stroke-width','0.5');
+      ln.setAttribute('stroke-dasharray','2 3');
+      g.appendChild(ln);
+
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx',px); dot.setAttribute('cy',py); dot.setAttribute('r','3.5');
+      dot.setAttribute('fill','#020a04'); dot.setAttribute('stroke','#00ff41');
+      dot.setAttribute('stroke-width','1.3'); dot.setAttribute('filter','url(#glow)');
+      dot.setAttribute('data-id',`${side.dir}${i}`);
+      dot.setAttribute('class','pole-sensor');
+      g.appendChild(dot);
+    }
+  });
+
+  // Fiber nodes on outer ring
+  if (S.fiber === 'on') {
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const nx = cx + frx * Math.cos(a);
+      const ny = cy + fry * Math.sin(a);
+      const fc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      fc.setAttribute('cx',nx); fc.setAttribute('cy',ny); fc.setAttribute('r','4');
+      fc.setAttribute('fill','#000508'); fc.setAttribute('stroke','#00cfff');
+      fc.setAttribute('stroke-width','1.5'); fc.setAttribute('filter','url(#fglow)');
+      fc.setAttribute('class','fiber-node');
+      fn.appendChild(fc);
+
+      // Fiber label
+      if (i % 2 === 0) {
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
+        lbl.setAttribute('x', nx + Math.cos(a) * 10);
+        lbl.setAttribute('y', ny + Math.sin(a) * 10 + 3);
+        lbl.setAttribute('text-anchor','middle');
+        lbl.setAttribute('fill','#00cfff55');
+        lbl.setAttribute('font-family','Share Tech Mono');
+        lbl.setAttribute('font-size','7');
+        lbl.textContent = `F${i/2}`;
+        fn.appendChild(lbl);
+      }
+    }
+  }
+}
+
+// ── OPTION SELECT ──
+function sel(el) {
+  const layer = el.dataset.layer;
+  const type = el.dataset.type;
+  document.querySelectorAll(`[data-layer="${layer}"]`).forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  S[layer] = type;
+  if (layer === 'pole') {
+    const sp = SPECS[type];
+    document.getElementById('specType').textContent = sp.type;
+    document.getElementById('specResp').textContent = sp.resp;
+    document.getElementById('specCost').textContent = sp.cost;
+    document.getElementById('specPower').textContent = sp.power;
+    document.getElementById('specNotes').textContent = sp.notes;
+  }
+  updateDiagram();
+  addLog(`CFG: ${layer.toUpperCase()} → ${type.toUpperCase()}`, 'sys');
+}
+
+function updatePoles(v) {
+  S.poleCount = parseInt(v);
+  document.getElementById('poleVal').textContent = v;
+  updateDiagram();
+}
+
+function updateStandoff(v) {
+  S.standoff = parseInt(v);
+  document.getElementById('standoffVal').textContent = v + 'cm';
+  updateDiagram();
+  addLog(`STANDOFF: ${v}cm`, 'sys');
+}
+
+// ── LOG ──
+function addLog(msg, type='hit') {
+  const log = document.getElementById('eventLog');
+  const d = document.createElement('div');
+  d.className = `ll ${type}`;
+  const ts = new Date().toISOString().slice(11,23);
+  d.textContent = `[${ts}] ${msg}`;
+  log.appendChild(d);
+  log.parentElement.scrollTop = log.parentElement.scrollHeight;
+}
+
+function clearAll() {
+  document.getElementById('eventLog').innerHTML = '';
+  S.hitCount = 0; S.flashCount = 0;
+  S.scopeWaves = []; S.scopeColors = [];
+  document.getElementById('hdrEvents').textContent = 'EVENTS: 0';
+  document.getElementById('scopeChannels').textContent = '0 active';
+  document.getElementById('scopeAmp').textContent = '—';
+  drawScope();
+  addLog('ALL CLEARED', 'sys');
+}
+
+function getDirLabel(a) {
+  return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((a%360)+360)%360/45)%8];
+}
+
+// ── INIT ──
+window.addEventListener('resize', () => { resizeScope(); });
+setTimeout(() => {
+  resizeScope();
+  updateDiagram();
+  addLog(`POLES: ${S.poleCount * 4} total // STANDOFF: ${S.standoff}cm`, 'sys');
+  addLog(`FIBER OPTIC BURST DISC LAYER: 8 nodes on outer ring`, 'fiber');
+}, 50);
+</script>
+</body>
+</html>

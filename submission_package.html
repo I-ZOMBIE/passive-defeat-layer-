@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUBMISSION PACKAGE // GET IT TO UKRAINE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+:root {
+  --p:#00ff41;--pd:#00aa2a;--pf:#002a0a;--pg:#00ff4122;
+  --a:#ffb300;--f:#00cfff;--fd:#006688;--fg:#00cfff22;
+  --r:#ff3333;--bg:#020a04;--pan:#060f07;--bdr:#00ff4133;
+  --sc:rgba(0,255,65,0.022);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--p);font-family:'Share Tech Mono',monospace;font-size:12px;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--sc) 2px,var(--sc) 4px);pointer-events:none;z-index:9999;}
+
+.hdr{background:var(--pan);border-bottom:1px solid var(--bdr);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;}
+.htitle{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:4px;text-shadow:0 0 14px var(--p);}
+.hsub{font-size:9px;color:var(--pd);letter-spacing:2px;margin-top:2px;}
+.urgency{font-family:'Orbitron',monospace;font-size:10px;color:var(--r);letter-spacing:2px;animation:blink 1s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.body{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 58px);}
+
+/* SIDEBAR NAV */
+.nav{border-right:1px solid var(--bdr);padding:14px;overflow-y:auto;}
+.nav::-webkit-scrollbar{width:3px;}
+.nav::-webkit-scrollbar-thumb{background:var(--bdr);}
+.nav-title{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--pd);border-bottom:1px solid var(--bdr);padding-bottom:5px;margin-bottom:10px;}
+
+.channel{border:1px solid var(--bdr);padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;}
+.channel:hover,.channel.active{border-color:var(--p);background:var(--pf);}
+.channel.urgent{border-color:var(--r);}
+.channel.urgent:hover,.channel.urgent.active{background:#1a0000;border-color:var(--r);}
+.ch-name{font-size:11px;color:var(--p);margin-bottom:3px;}
+.channel.urgent .ch-name{color:var(--r);}
+.ch-dead{font-size:9px;color:var(--r);margin-bottom:2px;}
+.ch-type{font-size:9px;color:var(--pd);}
+.ch-cost{font-size:9px;color:var(--a);}
+.status-pill{display:inline-block;font-size:8px;padding:1px 6px;border:1px solid;margin-top:3px;border-radius:1px;}
+.sp-open{border-color:var(--p);color:var(--p);}
+.sp-urgent{border-color:var(--r);color:var(--r);}
+.sp-free{border-color:var(--a);color:var(--a);}
+
+/* MAIN CONTENT */
+.main{overflow-y:auto;padding:18px;}
+.main::-webkit-scrollbar{width:3px;}
+.main::-webkit-scrollbar-thumb{background:var(--bdr);}
+
+.stitle{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;color:var(--pd);border-bottom:1px solid var(--bdr);padding-bottom:5px;margin-bottom:10px;margin-top:18px;}
+.stitle:first-child{margin-top:0;}
+
+.channel-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.ch-big-name{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;letter-spacing:2px;text-shadow:0 0 10px var(--p);}
+.ch-big-name.urgent{color:var(--r);text-shadow:0 0 10px var(--r);}
+.ch-meta{font-size:10px;color:var(--pd);line-height:1.8;}
+.ch-url{color:var(--f);text-decoration:none;}
+.ch-url:hover{text-shadow:0 0 6px var(--f);}
+
+.tip{background:var(--pf);border:1px solid var(--bdr);border-left:3px solid var(--a);padding:8px 10px;margin-bottom:10px;font-size:10px;line-height:1.7;color:var(--pd);}
+.tip strong{color:var(--a);}
+.tip.ft{border-left-color:var(--f);}
+.tip.ft strong{color:var(--f);}
+.tip.rt{border-left-color:var(--r);}
+.tip.rt strong{color:var(--r);}
+
+/* EMAIL DRAFT */
+.email-wrap{background:#000;border:1px solid var(--bdr);margin-bottom:12px;}
+.email-hdr{background:var(--pan);border-bottom:1px solid var(--bdr);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
+.email-label{font-size:9px;letter-spacing:2px;color:var(--pd);}
+.copy-btn{background:transparent;border:1px solid var(--pd);color:var(--pd);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 10px;cursor:pointer;letter-spacing:1px;transition:all 0.15s;}
+.copy-btn:hover{border-color:var(--p);color:var(--p);background:var(--pf);}
+.copy-btn.copied{border-color:var(--a);color:var(--a);}
+.email-fields{padding:10px 12px;border-bottom:1px solid var(--bdr);}
+.field-row{display:flex;gap:8px;margin-bottom:4px;font-size:10px;}
+.field-key{color:var(--pd);min-width:60px;}
+.field-val{color:var(--p);}
+.email-body{padding:12px;font-size:11px;line-height:1.8;color:var(--p);white-space:pre-wrap;font-family:'Share Tech Mono',monospace;}
+
+/* CHECKLIST */
+.checklist{background:#000;border:1px solid var(--bdr);padding:12px;margin-bottom:10px;}
+.check-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer;padding:4px;transition:background 0.15s;}
+.check-item:hover{background:var(--pf);}
+.check-box{width:14px;height:14px;border:1px solid var(--pd);flex-shrink:0;margin-top:1px;position:relative;transition:all 0.15s;}
+.check-item.done .check-box{border-color:var(--p);}
+.check-item.done .check-box::after{content:'✓';position:absolute;top:-2px;left:1px;color:var(--p);font-size:11px;}
+.check-item.done .check-text{color:var(--pd);text-decoration:line-through;}
+.check-text{font-size:10px;line-height:1.5;}
+
+/* PACKAGE */
+.pkg-item{background:#000;border:1px solid var(--bdr);padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.pkg-name{font-size:11px;}
+.pkg-status{font-size:9px;color:var(--a);}
+.pkg-status.ready{color:var(--p);}
+
+.progress-bar-wrap{background:#000;border:1px solid var(--bdr);padding:8px 12px;margin-bottom:10px;}
+.pb-label{font-size:9px;color:var(--pd);margin-bottom:4px;}
+.pb-track{height:8px;background:#001500;border:1px solid var(--bdr);}
+.pb-fill{height:100%;background:var(--p);box-shadow:0 0 6px var(--p);transition:width 0.4s;}
+
+.badge{text-align:center;font-size:9px;color:var(--pd);letter-spacing:1px;margin-top:14px;padding-top:8px;border-top:1px solid var(--bdr);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="htitle">GET IT TO UKRAINE // SUBMISSION PACKAGE</div>
+    <div class="hsub">OPEN CHANNELS // REAL CONTACTS // REAL DEADLINES // JUNE 2026</div>
+  </div>
+  <div class="urgency">⚠ BRAVE1 DEADLINE: JUNE 15, 2026</div>
+</div>
+
+<div class="body">
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-title">// CHANNELS</div>
+
+    <div class="channel urgent active" onclick="show('brave1')">
+      <div class="ch-name">Brave1 / Battle Proven</div>
+      <div class="ch-dead">⏰ DEADLINE: JUNE 15, 2026</div>
+      <div class="ch-type">Ukraine Govt // Defense startup competition</div>
+      <div><span class="status-pill sp-urgent">CLOSES IN DAYS</span></div>
+    </div>
+
+    <div class="channel" onclick="show('dtu')">
+      <div class="ch-name">Defense Tech for Ukraine (DTU)</div>
+      <div class="ch-type">US Nonprofit // 300+ volunteer engineers</div>
+      <div class="ch-cost">Free // volunteer incubator</div>
+      <div><span class="status-pill sp-open">ALWAYS OPEN</span></div>
+    </div>
+
+    <div class="channel" onclick="show('unite')">
+      <div class="ch-name">UNITE — Brave NATO</div>
+      <div class="ch-type">NATO + Ukraine // C-UAS focus</div>
+      <div class="ch-cost">Up to €10M grants</div>
+      <div><span class="status-pill sp-open">OPEN NOW</span></div>
+    </div>
+
+    <div class="channel" onclick="show('github')">
+      <div class="ch-name">GitHub Public Release</div>
+      <div class="ch-type">Open source // anyone can build it</div>
+      <div class="ch-cost">Free // do this FIRST</div>
+      <div><span class="status-pill sp-free">DO TODAY</span></div>
+    </div>
+
+    <div class="channel" onclick="show('darpa')">
+      <div class="ch-name">DARPA Open BAA</div>
+      <div class="ch-type">US DOD // always-open submissions</div>
+      <div class="ch-cost">No cost to submit</div>
+      <div><span class="status-pill sp-open">ALWAYS OPEN</span></div>
+    </div>
+
+    <div class="channel" onclick="show('package')">
+      <div class="ch-name">📦 Your Submission Package</div>
+      <div class="ch-type">Checklist + what you have + what to prep</div>
+      <div><span class="status-pill sp-free">BUILD THIS FIRST</span></div>
+    </div>
+
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--bdr);">
+      <div class="pb-label">OVERALL PROGRESS</div>
+      <div class="pb-track"><div class="pb-fill" id="overallBar" style="width:5%"></div></div>
+      <div style="font-size:9px;color:var(--pd);margin-top:3px;" id="overallLabel">0 / 6 steps complete</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainContent">
+    <!-- Default: package view -->
+  </div>
+</div>
+
+<script>
+const CHANNELS = {
+
+  package: {
+    name: 'YOUR SUBMISSION PACKAGE',
+    urgent: false,
+    meta: `Build this before submitting anywhere. It's the same core content — just packaged differently for each channel.`,
+    content: () => `
+<div class="stitle">// WHAT YOU HAVE (BUILT THIS SESSION)</div>
+<div class="pkg-item"><span class="pkg-name">Sensor Array Test Rig + Oscilloscope</span><span class="pkg-status ready">✓ BUILT // sensor_array_rig.html</span></div>
+<div class="pkg-item"><span class="pkg-name">Bill of Materials (with salvage mode)</span><span class="pkg-status ready">✓ BUILT // sensor_array_bom.html</span></div>
+<div class="pkg-item"><span class="pkg-name">Road Panel System — Dual Tier</span><span class="pkg-status ready">✓ BUILT // road_panel_system.html</span></div>
+<div class="pkg-item"><span class="pkg-name">Circuit Diagrams (Tier 1 + Tier 2)</span><span class="pkg-status ready">✓ BUILT // in road_panel_system.html</span></div>
+<div class="pkg-item"><span class="pkg-name">Arduino Firmware Sketch</span><span class="pkg-status ready">✓ BUILT // in road_panel_system.html</span></div>
+<div class="pkg-item"><span class="pkg-name">Fiber Optic Zone Simulation</span><span class="pkg-status ready">✓ BUILT // interactive</span></div>
+
+<div class="stitle">// WHAT TO PREP NEXT (1–2 HOURS)</div>
+<div class="checklist" id="checklist-pkg">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">GitHub repo</strong> — Create "passive-defeat-layer" repo. Push all 3 HTML files + README. MIT license. This is your proof of concept and your credibility anchor. Do this before any email.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">One-page brief (PDF)</strong> — Problem → Solution → Cost → Why now. Max 1 page. No jargon. Numbers front and center: $0.44/panel, ~$8/m perimeter, 4 components, no firmware on Tier 1. Claude can write this for you right now.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">30-second video</strong> — Screen record the road panel simulation. Hit the sweep button. Show the fiber zones light up. Narrate in 30 seconds. Phone camera is fine. This is worth 10 pages of writing.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Cost comparison slide</strong> — One image: Your system vs cope cage vs Trophy vs Arena-M. The bar chart is already in the BOM app. Screenshot it.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Contact info</strong> — Real name, email, location. You don't need a company. "Independent researcher / maker" is fine. DTU especially loves individual contributors.</div>
+  </div>
+</div>
+
+<div class="tip rt">
+  <strong>KEY FRAMING:</strong> You are NOT selling a product. You are giving away open-source defensive research that anyone can build in a basement from salvaged parts. That is your superpower. No IP games, no pricing negotiations, no supply chain. Just: here it is, build it, it costs $0.44 per panel.
+</div>
+
+<div class="tip ft">
+  <strong>TECHNOLOGY READINESS LEVEL (TRL):</strong> Brave1 wants TRL 5-6 (prototype validated). You're currently TRL 2-3 (concept + simulation). Be honest about this. DTU works with TRL 1+. Frame it as: "simulation complete, seeking partner in Ukraine for physical prototype validation."
+</div>
+`
+  },
+
+  brave1: {
+    name: 'BRAVE1 // BATTLE PROVEN 2026',
+    urgent: true,
+    meta: `Ukraine's official defense innovation cluster. Battle Proven competition runs inside Defense Tech Valley, Sept 16–17 in Lviv. DEADLINE JUNE 15 at 23:59.`,
+    url: 'https://brave1.gov.ua/en/',
+    url2: 'https://defensevalley.tech',
+    email: 'finance@brave1.gov.ua',
+    content: () => `
+<div class="tip rt">
+  <strong>⏰ DEADLINE: JUNE 15, 2026 at 23:59 Kyiv time.</strong> Today is June 9. You have SIX DAYS. This is the most important channel. Move first.
+</div>
+
+<div class="stitle">// WHAT BRAVE1 WANTS</div>
+<div class="tip">
+  <strong>Battle Proven track</strong> focuses on technologies already used in combat OR deployable within 12 months. They explicitly want: counter-UAS, passive protection systems, low-cost scalable solutions. Your system hits all three. Selection committee includes actual frontline units — Unmanned Systems Forces, 3rd Army Corps, National Guard 2nd Corps. These are the people who will actually use it.
+</div>
+
+<div class="stitle">// HOW TO APPLY</div>
+<div class="checklist" id="checklist-brave1">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Go to <strong style="color:var(--f)">defensevalley.tech</strong> → find the Battle Proven application form</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Register as an international individual (not a company — individuals are eligible)</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Upload: 1-page brief + GitHub link + BOM screenshot + optional video</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Be honest: TRL 2-3, seeking Ukrainian partner for physical prototype</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Send advance email to finance@brave1.gov.ua — see draft below</div>
+  </div>
+</div>
+
+<div class="stitle">// EMAIL DRAFT — BRAVE1</div>
+<div class="email-wrap" id="email-brave1">
+  <div class="email-hdr">
+    <span class="email-label">DRAFT EMAIL // BRAVE1</span>
+    <button class="copy-btn" onclick="copyEmail('email-brave1-body')">COPY</button>
+  </div>
+  <div class="email-fields">
+    <div class="field-row"><span class="field-key">TO:</span><span class="field-val">finance@brave1.gov.ua</span></div>
+    <div class="field-row"><span class="field-key">SUBJECT:</span><span class="field-val">Battle Proven 2026 — Passive FPV Defeat Layer: $0.44/panel sensor net, open source, basement-buildable</span></div>
+  </div>
+  <div class="email-body" id="email-brave1-body">Dear Brave1 / Defense Tech Valley team,
+
+I am an independent American maker and researcher submitting a passive drone/FPV defeat sensor system for the Battle Proven 2026 competition.
+
+THE SYSTEM:
+A passive, layered impact and optical flash detection array designed to wrap vehicles or road corridors. It detects incoming FPV drones, explosions, and impacts — triggering an alert and lighting up a fiber optic visual zone map — without requiring active radar or expensive electronics.
+
+TWO TIERS:
+• Tier 1 (Pure Analog): 4 components — LM393 comparator + NPN transistor + 2 resistors. No microcontroller. No firmware. ~$0.44/panel. Works forever. Field-repairable with salvaged parts.
+• Tier 2 (Smart): ATmega328P bare chip + MAX485 RS-485 bus. Timestamps hits, logs zone ID and estimated velocity, discriminates small impact vs explosion vs optical flash. ~$3.20/panel. Chainable across 1200m of road with 2 wires.
+
+FIBER OPTIC LAYER:
+Plastic optical fiber woven through the mesh acts as a flash/blast detector (EMP-immune) AND a passive visual zone indicator — different LED colors per zone, zones light up on detection. In Ukraine, FPV tether fiber recovered from the field makes this layer essentially free.
+
+KEY NUMBERS:
+• Cost per vehicle rig: ~$60–80 complete
+• Cost per road panel: ~$0.44 (Tier 1) to $3.20 (Tier 2)
+• Cost per meter of perimeter: ~$4–8
+• Parts: globally available, no exotic components, no supply chain lock-in
+• Build time: 20 min/panel (Tier 1), 1 hr/panel (Tier 2)
+
+OPEN SOURCE:
+All designs, circuit diagrams, firmware, BOM, and interactive simulation tools are open source (MIT license) and available at: [YOUR GITHUB LINK HERE]
+
+CURRENT STATUS: TRL 2-3 (simulation complete, circuit diagrams validated). Seeking Ukrainian partner for physical prototype and field validation.
+
+I am not seeking funding — I am giving this away. If this is useful, please take it and build it.
+
+With respect and admiration for Ukraine's defenders,
+[YOUR NAME]
+[YOUR EMAIL]
+[YOUR LOCATION, USA]</div>
+</div>
+`
+  },
+
+  dtu: {
+    name: 'DEFENSE TECH FOR UKRAINE (DTU)',
+    urgent: false,
+    meta: `US-based volunteer nonprofit. 300+ engineers, developers, operators. Functions as an international early-stage incubator. Runs weekly strategy sessions. Perfect for TRL 1-3 ideas.`,
+    url: 'https://defensetechforukraine.org',
+    email: 'info@defensetechforukraine.org',
+    content: () => `
+<div class="tip ft">
+  <strong>WHY DTU IS YOUR BEST FIRST CALL:</strong> They specifically work with TRL 1+ — early stage ideas. They have 300+ volunteers including engineers who can help prototype. They have direct connections to Ukrainian military units. They run weekly sessions. Founded by a US Army vet who fought in Ukraine. These are your people.
+</div>
+
+<div class="stitle">// HOW TO ENGAGE DTU</div>
+<div class="checklist" id="checklist-dtu">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Go to <strong style="color:var(--f)">defensetechforukraine.org/volunteer/engineering-for-ukraine/</strong> → submit engineer interest form</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Also email info@defensetechforukraine.org directly with your concept + GitHub link</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Ask to join weekly strategy sessions — they're open to volunteers</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Ask to join their Signal drone tech chats — direct line to operators</div>
+  </div>
+</div>
+
+<div class="stitle">// EMAIL DRAFT — DTU</div>
+<div class="email-wrap" id="email-dtu">
+  <div class="email-hdr">
+    <span class="email-label">DRAFT EMAIL // DTU</span>
+    <button class="copy-btn" onclick="copyEmail('email-dtu-body')">COPY</button>
+  </div>
+  <div class="email-fields">
+    <div class="field-row"><span class="field-key">TO:</span><span class="field-val">info@defensetechforukraine.org</span></div>
+    <div class="field-row"><span class="field-key">SUBJECT:</span><span class="field-val">Volunteer engineer — passive FPV defeat sensor net, open source, $0.44/panel, basement-buildable</span></div>
+  </div>
+  <div class="email-body" id="email-dtu-body">Hi DTU team,
+
+I'm an American maker and independent researcher. I've spent the last several weeks designing a passive FPV/drone defeat sensor system specifically optimized for Ukrainian conditions — cheap enough to build in a basement, repairable with salvaged parts (including recovered FPV tether fiber), and requiring no exotic components or supply chains.
+
+I'd like to contribute this work to your mission and connect with engineers who can help move it toward physical prototype and field testing.
+
+THE SYSTEM IN ONE SENTENCE:
+A chainable passive sensor net — steel mesh + PVDF piezo impact sensors + fiber optic flash detectors — that wraps vehicles or road corridors, detects incoming FPV drones and explosions, and lights up a visual zone map, for $0.44–$3.20 per panel depending on tier.
+
+TWO TIERS:
+• Pure analog (no code): LM393 comparator, NPN transistor, 2 resistors. 4 parts. $0.44/panel.
+• Smart (ATmega328/Arduino clone): timestamps, zone ID, velocity estimate, RS-485 daisy chain, 32 panels on 2 wires across 1200m. $3.20/panel.
+
+FIBER OPTIC LAYER:
+The mesh weaves in plastic optical fiber as both a flash/blast detector (EMP-immune) and a visual zone indicator. Recovered FPV tether fiber from the field makes this free in Ukraine.
+
+Everything is open source at: [GITHUB LINK]
+Interactive simulation tools, circuit diagrams, full BOM with salvage mode, and Arduino firmware are all complete.
+
+I'm not looking for funding. I want to help. I'd love to:
+• Join your weekly strategy sessions
+• Connect with engineers who can prototype this physically
+• Get it in front of Ukrainian units who could test it
+
+Happy to jump on a call any time.
+
+[YOUR NAME]
+[YOUR EMAIL]
+[YOUR LOCATION]</div>
+</div>
+`
+  },
+
+  unite: {
+    name: 'UNITE — BRAVE NATO',
+    urgent: false,
+    meta: `Joint NATO + Ukraine program. €10M grants. Requires matchmaking with a NATO-country company partner. Focused on C-UAS. Portal: portal.usf.com.ua`,
+    url: 'https://brave1.gov.ua/en/',
+    email: 'unite@brave1.gov.ua',
+    content: () => `
+<div class="tip">
+  <strong>HONEST ASSESSMENT:</strong> UNITE requires a joint application — you need a Ukrainian company partner AND you (as a NATO-country individual/entity). This is a slightly longer path but the money is real (€10M pool) and the C-UAS focus is a perfect match. Contact DTU first — they can help you find a Ukrainian partner.
+</div>
+
+<div class="stitle">// HOW IT WORKS</div>
+<div class="tip ft">
+  <strong>MATCHMAKING MECHANIC:</strong> You register on the portal. Ukrainian companies register. The system matches you. Or — email unite@brave1.gov.ua directly if you don't want your data public. Tell them you have a NATO-country innovator (you, USA) with open-source passive C-UAS technology seeking a Ukrainian manufacturing partner.
+</div>
+
+<div class="stitle">// STEPS</div>
+<div class="checklist" id="checklist-unite">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Go to <strong style="color:var(--f)">portal.usf.com.ua</strong> → register as NATO-country innovator</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">OR email unite@brave1.gov.ua — ask about matchmaking for passive C-UAS sensor net</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Get DTU to make an intro to a Ukrainian partner — they have the network</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Submit joint proposal when window opens (summer 2026)</div>
+  </div>
+</div>
+
+<div class="stitle">// EMAIL DRAFT — UNITE MATCHMAKING</div>
+<div class="email-wrap" id="email-unite">
+  <div class="email-hdr">
+    <span class="email-label">DRAFT EMAIL // UNITE BRAVE NATO</span>
+    <button class="copy-btn" onclick="copyEmail('email-unite-body')">COPY</button>
+  </div>
+  <div class="email-fields">
+    <div class="field-row"><span class="field-key">TO:</span><span class="field-val">unite@brave1.gov.ua</span></div>
+    <div class="field-row"><span class="field-key">SUBJECT:</span><span class="field-val">UNITE matchmaking request — NATO-country innovator, passive C-UAS sensor net, open source</span></div>
+  </div>
+  <div class="email-body" id="email-unite-body">Dear UNITE — Brave NATO team,
+
+I am a US-based independent maker and researcher seeking matchmaking with a Ukrainian manufacturing partner under the UNITE — Brave NATO program.
+
+I have developed open-source designs for a passive counter-UAS sensor detection system: a chainable impact + optical flash detection array designed to protect vehicles and road corridors from FPV drone attacks.
+
+Key characteristics:
+• No active radar — passive detection only (PVDF piezo + fiber optic)
+• EMP-resistant fiber optic flash detection layer
+• Tier 1: pure analog, 4 components, $0.44/panel, no firmware
+• Tier 2: ATmega328/Arduino, RS-485 bus, 32 panels / 1200m, $3.20/panel
+• Fully open source — MIT license — designed to be built from salvaged parts
+• FPV tether fiber recovered from field = free fiber layer in Ukraine
+
+I am a NATO-country (USA) innovator seeking a Ukrainian company or volunteer lab partner for physical prototyping and field validation. I am not seeking compensation — I want this in the hands of Ukrainian defenders as fast as possible.
+
+All designs, interactive simulations, circuit diagrams, BOM, and firmware available at: [GITHUB LINK]
+
+Could you assist with matchmaking or direct me to appropriate Ukrainian partners?
+
+With deep respect,
+[YOUR NAME]
+[YOUR EMAIL]
+[USA]</div>
+</div>
+`
+  },
+
+  github: {
+    name: 'GITHUB PUBLIC RELEASE',
+    urgent: false,
+    meta: `Do this FIRST. Before any email. A GitHub repo is your proof of work, your credibility, and your open-source timestamp. Everything else links to it.`,
+    content: () => `
+<div class="tip rt">
+  <strong>DO THIS TODAY — BEFORE ANY EMAIL.</strong> Every submission will ask for a link. A GitHub repo takes 10 minutes to set up and makes everything else 10x more credible.
+</div>
+
+<div class="stitle">// REPO SETUP CHECKLIST</div>
+<div class="checklist" id="checklist-github">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Create repo: <strong style="color:var(--p)">passive-defeat-layer</strong> — public, MIT license</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Upload: sensor_array_rig.html, sensor_array_bom.html, road_panel_system.html</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Write README.md — Claude can write this for you right now, just ask</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Add LICENSE file — MIT. Copy-paste from choosealicense.com</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Tag repo: ukraine, counter-uas, fpv-defense, open-source, passive-sensor, arduino</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Enable GitHub Pages — your HTML files become live demos instantly. Free hosting.</div>
+  </div>
+</div>
+
+<div class="stitle">// README STRUCTURE (Claude will write the full text)</div>
+<div style="background:#000;border:1px solid var(--bdr);padding:10px;font-size:10px;line-height:1.9;margin-bottom:10px;">
+  <div style="color:var(--f)"># Passive Defeat Layer — Open Source FPV/Drone Detection System</div>
+  <div style="color:var(--pd)">## What This Is</div>
+  <div style="color:var(--pd)">## The Problem It Solves</div>
+  <div style="color:var(--pd)">## Two Tiers (Analog + Smart)</div>
+  <div style="color:var(--pd)">## Cost: $0.44–$3.20 per panel</div>
+  <div style="color:var(--pd)">## How to Build It (BOM + circuit diagrams)</div>
+  <div style="color:var(--pd)">## Fiber Optic Layer</div>
+  <div style="color:var(--pd)">## Live Demo (GitHub Pages links)</div>
+  <div style="color:var(--pd)">## License: MIT — Free to use, build, modify</div>
+  <div style="color:var(--pd)">## 🇺🇦 Slava Ukraini</div>
+</div>
+
+<div class="tip ft">
+  <strong>GITHUB PAGES TIP:</strong> Go to repo Settings → Pages → Source: main branch → /root. Your HTML files become live at username.github.io/passive-defeat-layer/road_panel_system.html — a live interactive demo anyone in the world can open on their phone. This is more powerful than any PDF.
+</div>
+`
+  },
+
+  darpa: {
+    name: 'DARPA OPEN BAA',
+    urgent: false,
+    meta: `DARPA's Broad Agency Announcement is always open. No deadline. Submit a white paper (2-8 pages) to any relevant program office. Low barrier, potentially high impact.`,
+    url: 'https://www.darpa.mil/work-with-us/opportunities',
+    content: () => `
+<div class="tip">
+  <strong>REALISTIC EXPECTATION:</strong> DARPA is a longer shot than Brave1/DTU for this specific concept. But the Open BAA costs nothing to submit, and DARPA genuinely reads white papers from individual inventors. The relevant program offices are: TTO (Tactical Technology Office) and DSO (Defense Sciences Office).
+</div>
+
+<div class="stitle">// WHITE PAPER FORMAT (2-8 pages)</div>
+<div class="checklist" id="checklist-darpa">
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Section 1: Technical Approach</strong> — What the system does, how it works, why it's novel</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Section 2: Impact</strong> — Cost asymmetry argument. Their $400 drone vs your $0.44 detector.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Section 3: Feasibility</strong> — Simulation complete, circuit diagrams, BOM, firmware</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text"><strong style="color:var(--p)">Section 4: Team</strong> — Independent maker. Honest about TRL. Seeking DoD partner for prototype.</div>
+  </div>
+  <div class="check-item" onclick="toggleCheck(this)">
+    <div class="check-box"></div>
+    <div class="check-text">Submit via DARPA BAA portal — darpa.mil → Work With Us → Opportunities</div>
+  </div>
+</div>
+
+<div class="tip ft">
+  <strong>DARPA LOVES:</strong> Unconventional approaches. Low cost. Asymmetric thinking. "Spend $0.44 to detect a $400 drone" is exactly the kind of cost-inversion argument they respond to. Lead with that number.
+</div>
+`
+  }
+};
+
+let completedChecks = 0;
+let totalChecks = 0;
+
+function show(id) {
+  document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const ch = CHANNELS[id];
+  const main = document.getElementById('mainContent');
+
+  let html = `
+    <div class="channel-header">
+      <div>
+        <div class="ch-big-name ${ch.urgent ? 'urgent' : ''}">${ch.name}</div>
+        <div class="ch-meta" style="margin-top:6px;">${ch.meta}</div>
+        ${ch.url ? `<div style="margin-top:4px;"><a class="ch-url" href="${ch.url}" target="_blank">→ ${ch.url}</a></div>` : ''}
+        ${ch.email ? `<div style="margin-top:2px;font-size:10px;color:var(--a);">📧 ${ch.email}</div>` : ''}
+      </div>
+    </div>
+    ${ch.content()}
+    <div class="badge">🇺🇦 SLAVA UKRAINI // OPEN SOURCE // GIVE IT AWAY FREE</div>
+  `;
+  main.innerHTML = html;
+  countChecks();
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  updateProgress();
+}
+
+function updateProgress() {
+  const allChecks = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.done');
+  const total = allChecks.length;
+  const pct = total > 0 ? Math.round((done.length / total) * 100) : 0;
+  document.getElementById('overallBar').style.width = pct + '%';
+  document.getElementById('overallLabel').textContent = `${done.length} / ${total} steps complete`;
+}
+
+function countChecks() {
+  setTimeout(updateProgress, 50);
+}
+
+function copyEmail(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = el.closest('.email-wrap').querySelector('.copy-btn');
+    if (btn) {
+      btn.textContent = 'COPIED ✓';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 2000);
+    }
+  });
+}
+
+// Init
+show('brave1');
+</script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENSOR ARRAY // BILL OF MATERIALS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+  :root {
+    --p: #00ff41; --pd: #00aa2a; --pg: #00ff4155; --pf: #003a0e;
+    --a: #ffb300; --r: #ff3333; --f: #00cfff; --fd: #006688;
+    --bg: #020a04; --pan: #060f07; --bdr: #00ff4133;
+    --sc: rgba(0,255,65,0.025);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--p); font-family: 'Share Tech Mono', monospace; font-size: 12px; min-height: 100vh; }
+  body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--sc) 2px,var(--sc) 4px); pointer-events:none; z-index:9999; }
+
+  .hdr { background:var(--pan); border-bottom:1px solid var(--bdr); padding:10px 18px; display:flex; justify-content:space-between; align-items:center; }
+  .htitle { font-family:'Orbitron',monospace; font-size:14px; font-weight:900; letter-spacing:4px; text-shadow:0 0 14px var(--p); }
+  .hsub { font-size:9px; color:var(--pd); letter-spacing:2px; margin-top:1px; }
+  .hright { text-align:right; }
+  .total-display { font-family:'Orbitron',monospace; font-size:22px; font-weight:900; color:var(--a); text-shadow:0 0 12px var(--a); }
+  .total-label { font-size:9px; color:var(--pd); letter-spacing:2px; }
+
+  .body { display:grid; grid-template-columns:1fr 320px; gap:0; height:calc(100vh - 58px); }
+
+  .main { overflow-y:auto; padding:16px; border-right:1px solid var(--bdr); }
+  .main::-webkit-scrollbar { width:3px; }
+  .main::-webkit-scrollbar-thumb { background:var(--bdr); }
+
+  .sidebar { overflow-y:auto; padding:14px; }
+  .sidebar::-webkit-scrollbar { width:3px; }
+  .sidebar::-webkit-scrollbar-thumb { background:var(--bdr); }
+
+  .section-title {
+    font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px; color:var(--pd);
+    border-bottom:1px solid var(--bdr); padding-bottom:5px; margin-bottom:10px; margin-top:16px;
+  }
+  .section-title:first-child { margin-top:0; }
+
+  /* BOM TABLE */
+  table.bom { width:100%; border-collapse:collapse; margin-bottom:4px; }
+  table.bom th { font-size:9px; letter-spacing:2px; color:var(--pd); text-align:left; padding:4px 6px; border-bottom:1px solid var(--bdr); }
+  table.bom td { padding:5px 6px; border-bottom:1px solid #00ff4111; vertical-align:top; font-size:11px; }
+  table.bom tr:hover td { background:var(--pf); }
+  .bom .item { color:var(--p); }
+  .bom .spec { font-size:9px; color:var(--pd); margin-top:1px; }
+  .bom .note { font-size:9px; color:var(--a); margin-top:1px; }
+  .bom .src { font-size:9px; color:var(--f); margin-top:1px; }
+  .bom .qty { color:var(--a); text-align:center; }
+  .bom .unit-cost { color:var(--p); text-align:right; }
+  .bom .line-cost { color:var(--a); text-align:right; font-weight:bold; }
+  .bom .cat-fiber { border-left:2px solid var(--f); }
+  .bom .cat-mech { border-left:2px solid var(--p); }
+  .bom .cat-ctrl { border-left:2px solid var(--a); }
+  .bom .cat-struct { border-left:2px solid #888; }
+
+  /* QTY CONTROLS */
+  .qty-ctrl { display:flex; align-items:center; gap:4px; justify-content:center; }
+  .qbtn { background:transparent; border:1px solid var(--pd); color:var(--p); font-family:'Share Tech Mono',monospace; width:18px; height:18px; font-size:12px; cursor:pointer; line-height:1; padding:0; transition:all 0.1s; }
+  .qbtn:hover { background:var(--pf); border-color:var(--p); }
+  .qnum { min-width:24px; text-align:center; color:var(--a); }
+
+  /* SCALE CONTROLS */
+  .scale-row { display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  .scale-btn { background:transparent; border:1px solid var(--pd); color:var(--pd); font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:1px; padding:5px 10px; cursor:pointer; transition:all 0.15s; }
+  .scale-btn:hover, .scale-btn.active { border-color:var(--p); color:var(--p); background:var(--pf); }
+
+  input[type=range] { -webkit-appearance:none; width:100%; height:2px; background:var(--bdr); outline:none; margin:6px 0 2px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; background:var(--p); box-shadow:0 0 4px var(--p); cursor:pointer; }
+
+  /* COST BREAKDOWN */
+  .breakdown { background:#000; border:1px solid var(--bdr); padding:10px; margin-bottom:10px; }
+  .bk-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid #00ff4111; font-size:11px; }
+  .bk-row:last-child { border-bottom:none; }
+  .bk-label { color:var(--pd); }
+  .bk-val { color:var(--p); }
+  .bk-total { color:var(--a); font-weight:bold; font-size:13px; }
+  .bk-fiber { color:var(--f); }
+
+  .grand { background:#000; border:2px solid var(--a); padding:12px; margin-bottom:10px; text-align:center; }
+  .grand-num { font-family:'Orbitron',monospace; font-size:28px; font-weight:900; color:var(--a); text-shadow:0 0 16px var(--a); }
+  .grand-sub { font-size:9px; color:var(--pd); letter-spacing:2px; margin-top:2px; }
+
+  .compare { background:#000; border:1px solid var(--bdr); padding:10px; margin-bottom:10px; }
+  .cmp-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .cmp-label { font-size:10px; color:var(--pd); }
+  .cmp-bar-wrap { flex:1; margin:0 8px; height:6px; background:#001a00; border:1px solid var(--bdr); }
+  .cmp-bar { height:100%; background:var(--p); box-shadow:0 0 4px var(--p); transition:width 0.3s; }
+  .cmp-bar.expensive { background:var(--r); box-shadow:0 0 4px var(--r); }
+  .cmp-bar.mid { background:var(--a); box-shadow:0 0 4px var(--a); }
+  .cmp-val { font-size:10px; color:var(--p); min-width:55px; text-align:right; }
+
+  .tip { background:var(--pf); border:1px solid var(--bdr); border-left:3px solid var(--a); padding:8px 10px; margin-bottom:8px; font-size:10px; line-height:1.7; color:var(--pd); }
+  .tip strong { color:var(--a); }
+  .tip.ftip { border-left-color:var(--f); }
+  .tip.ftip strong { color:var(--f); }
+
+  .badge { text-align:center; font-size:9px; color:var(--pd); letter-spacing:1px; margin-top:12px; padding-top:8px; border-top:1px solid var(--bdr); }
+
+  .unit-toggle { display:flex; gap:0; margin-bottom:10px; }
+  .ut { background:transparent; border:1px solid var(--pd); color:var(--pd); font-family:'Share Tech Mono',monospace; font-size:9px; padding:4px 12px; cursor:pointer; transition:all 0.15s; }
+  .ut.on { background:var(--pf); border-color:var(--p); color:var(--p); }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="htitle">SENSOR ARRAY // BILL OF MATERIALS</div>
+    <div class="hsub">PASSIVE DEFEAT LAYER — IMPACT + OPTICAL DETECTION // OPEN SOURCE</div>
+  </div>
+  <div class="hright">
+    <div class="total-display" id="hdrTotal">$0.00</div>
+    <div class="total-label">TOTAL PER VEHICLE RIG</div>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- MAIN BOM -->
+  <div class="main">
+
+    <div class="section-title">// SCALE + UNITS</div>
+    <div class="scale-row">
+      <span style="font-size:9px;color:var(--pd);">PERIMETER:</span>
+      <button class="scale-btn active" onclick="setScale('vehicle')" id="scl-vehicle">VEHICLE (~8m)</button>
+      <button class="scale-btn" onclick="setScale('apc')" id="scl-apc">APC (~16m)</button>
+      <button class="scale-btn" onclick="setScale('tank')" id="scl-tank">TANK (~25m)</button>
+      <button class="scale-btn" onclick="setScale('road10')" id="scl-road10">ROAD PANEL 10m</button>
+      <button class="scale-btn" onclick="setScale('road50')" id="scl-road50">ROAD PANEL 50m</button>
+    </div>
+    <div class="scale-row">
+      <span style="font-size:9px;color:var(--pd);">CURRENCY:</span>
+      <div class="unit-toggle">
+        <button class="ut on" id="ut-usd" onclick="setCurrency('usd')">USD $</button>
+        <button class="ut" id="ut-eur" onclick="setCurrency('eur')">EUR €</button>
+        <button class="ut" id="ut-uah" onclick="setCurrency('uah')">UAH ₴</button>
+      </div>
+      <span style="font-size:9px;color:var(--pd);margin-left:12px;">MODE:</span>
+      <div class="unit-toggle">
+        <button class="ut on" id="ut-new" onclick="setSalvage(false)">NEW PARTS</button>
+        <button class="ut" id="ut-salvage" onclick="setSalvage(true)">MAX SALVAGE 💀</button>
+      </div>
+      <div class="unit-toggle">
+        <button class="ut on" id="ut-m" onclick="setUnits('m')">METRIC</button>
+        <button class="ut" id="ut-ft" onclick="setUnits('ft')">FREEDOM UNITS 🦅</button>
+      </div>
+    </div>
+
+    <!-- LAYER 1: MECHANICAL MESH -->
+    <div class="section-title">// LAYER 1 — MECHANICAL MESH (GREEN)</div>
+    <table class="bom" id="tbl-mech">
+      <thead>
+        <tr>
+          <th style="width:35%">COMPONENT</th>
+          <th style="width:12%">QTY</th>
+          <th style="width:18%">UNIT COST</th>
+          <th style="width:15%">LINE TOTAL</th>
+          <th style="width:20%">SOURCE</th>
+        </tr>
+      </thead>
+      <tbody id="bom-mech"></tbody>
+    </table>
+
+    <!-- LAYER 2: POLES + SENSORS -->
+    <div class="section-title">// LAYER 2 — POLE SENSOR ARRAY (GREEN)</div>
+    <table class="bom" id="tbl-pole">
+      <thead>
+        <tr>
+          <th style="width:35%">COMPONENT</th>
+          <th style="width:12%">QTY</th>
+          <th style="width:18%">UNIT COST</th>
+          <th style="width:15%">LINE TOTAL</th>
+          <th style="width:20%">SOURCE</th>
+        </tr>
+      </thead>
+      <tbody id="bom-pole"></tbody>
+    </table>
+
+    <!-- LAYER 3: FIBER OPTIC -->
+    <div class="section-title">// LAYER 3 — FIBER OPTIC BURST DISC (CYAN)</div>
+    <table class="bom" id="tbl-fiber">
+      <thead>
+        <tr>
+          <th style="width:35%">COMPONENT</th>
+          <th style="width:12%">QTY</th>
+          <th style="width:18%">UNIT COST</th>
+          <th style="width:15%">LINE TOTAL</th>
+          <th style="width:20%">SOURCE</th>
+        </tr>
+      </thead>
+      <tbody id="bom-fiber"></tbody>
+    </table>
+
+    <!-- CONTROLLER -->
+    <div class="section-title">// CONTROLLER + LOGGING</div>
+    <table class="bom" id="tbl-ctrl">
+      <thead>
+        <tr>
+          <th style="width:35%">COMPONENT</th>
+          <th style="width:12%">QTY</th>
+          <th style="width:18%">UNIT COST</th>
+          <th style="width:15%">LINE TOTAL</th>
+          <th style="width:20%">SOURCE</th>
+        </tr>
+      </thead>
+      <tbody id="bom-ctrl"></tbody>
+    </table>
+
+    <!-- SALVAGE / ORGANIC / BASEMENT -->
+    <div class="section-title">// LAYER 4 — SALVAGE / ORGANIC / BASEMENT BUILD ♻</div>
+    <div class="tip" style="margin-bottom:10px; border-left-color:var(--r);">
+      <strong style="color:var(--r);">PHILOSOPHY:</strong> If it can't be built with a soldering iron, a drill, baling wire, and whatever's in the shed — it doesn't belong on this list. Everything below costs <strong>$0–$2</strong> and comes from salvage, dumpsters, dead electronics, or a hardware store within walking distance.
+    </div>
+    <table class="bom">
+      <thead>
+        <tr>
+          <th style="width:35%">COMPONENT</th><th style="width:12%">QTY</th>
+          <th style="width:18%">UNIT COST</th><th style="width:15%">LINE TOTAL</th>
+          <th style="width:20%">SOURCE</th>
+        </tr>
+      </thead>
+      <tbody id="bom-salvage"></tbody>
+    </table>
+
+    <div class="section-title" style="margin-top:20px;">// FIELD FABRICATION GUIDE</div>
+
+    <div class="tip"><strong>POLE SENSOR ASSEMBLY (10 min each):</strong><br>
+      1. Cut coat hanger / rebar wire 350mm. Bend 20mm tab at 90° for base.<br>
+      2. Epoxy or hot-glue PVDF film strip flat to base tab.<br>
+      3. Solder 2 leads to film electrodes. Wrap in inner tube strip for weatherproofing.<br>
+      4. Route leads along pole with zip ties. Cost: ~$0.80 film + free everything else.
+    </div>
+
+    <div class="tip ftip"><strong>FIBER TERMINATION (5 min each end):</strong><br>
+      1. Cut fiber to length. Hold end on 600-grit, rotate 30 sec. Repeat 2000-grit wet.<br>
+      2. Press polished end face-to-face with BPW34 photodiode. Heat-shrink over both.<br>
+      <strong>Side emission:</strong> run 400-grit lightly along length → light bleeds out sideways. Different LED color per zone = visual zone map. Free.
+    </div>
+
+    <div class="tip"><strong>DIY BURST DISC (15 min):</strong><br>
+      1. Cut 20mm circle from 0.1mm brass shim OR wine bottle foil cap.<br>
+      2. Score a cross with scalpel — light enough to hold, weak enough to pop on overpressure.<br>
+      3. Clamp over polished fiber end with hose clamp or zip tie.
+    </div>
+
+    <div class="tip"><strong>CONTROLLER BOX (5 min):</strong><br>
+      Any sealed food container. Drill cable entries, fill with hot glue or silicone. RPi inside.<br>
+      Power: USB power bank / 4×AA + boost converter / dead drone LiPo + $1 BMS board.
+    </div>
+
+    <div class="tip ftip"><strong>💀 UKRAINE FREE FIBER NOTE:</strong><br>
+      FPV tether drones leave literal spider webs across towns. Recovered tether = free single-mode fiber. Strip outer jacket, expose 125μm glass, couple to BPW34 with a drop of clear epoxy. Entire fiber layer cost = just the photodiodes. $0.40 each.
+    </div>
+
+    <div class="badge">🇺🇦 SLAVA UKRAINI // OPEN SOURCE // GIVE IT AWAY FREE // BUILD IT IN A BASEMENT</div>
+  </div>
+
+  <!-- SIDEBAR: COST SUMMARY -->
+  <div class="sidebar">
+
+    <div class="section-title" style="margin-top:0;">// COST SUMMARY</div>
+
+    <div class="grand">
+      <div class="grand-num" id="grandTotal">$0.00</div>
+      <div class="grand-sub" id="grandLabel">TOTAL // VEHICLE RIG</div>
+    </div>
+
+    <div class="breakdown" id="breakdownBlock">
+      <div class="bk-row"><span class="bk-label">Layer 1 — Mesh</span><span class="bk-val" id="sum-mech">$0.00</span></div>
+      <div class="bk-row"><span class="bk-label">Layer 2 — Poles</span><span class="bk-val" id="sum-pole">$0.00</span></div>
+      <div class="bk-row bk-fiber"><span class="bk-label">Layer 3 — Fiber</span><span class="bk-fiber" id="sum-fiber">$0.00</span></div>
+      <div class="bk-row"><span class="bk-label">Controller</span><span class="bk-val" id="sum-ctrl">$0.00</span></div>
+      <div class="bk-row" style="margin-top:4px;"><span class="bk-total">TOTAL</span><span class="bk-total" id="sum-total">$0.00</span></div>
+      <div class="bk-row" style="margin-top:2px;"><span class="bk-label">Per linear meter</span><span class="bk-val" id="sum-permeter">$0.00/m</span></div>
+      <div class="bk-row" id="salvage-note" style="display:none;margin-top:4px;"><span style="color:var(--r);font-size:10px;">💀 MAX SALVAGE MODE — substitutable parts shown as FREE</span></div>
+    </div>
+
+    <div class="section-title">// VS. ALTERNATIVES</div>
+    <div class="compare" id="compareBlock">
+      <div class="cmp-row">
+        <span class="cmp-label">THIS RIG</span>
+        <div class="cmp-bar-wrap"><div class="cmp-bar" id="bar-this" style="width:8%"></div></div>
+        <span class="cmp-val" id="cmp-this">$0</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">COPE CAGE</span>
+        <div class="cmp-bar-wrap"><div class="cmp-bar mid" style="width:25%"></div></div>
+        <span class="cmp-val" style="color:var(--a)">~$500</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">ARENA-M</span>
+        <div class="cmp-bar-wrap"><div class="cmp-bar expensive" style="width:60%"></div></div>
+        <span class="cmp-val" style="color:var(--r)">~$300K</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">TROPHY</span>
+        <div class="cmp-bar-wrap"><div class="cmp-bar expensive" style="width:100%"></div></div>
+        <span class="cmp-val" style="color:var(--r)">~$1M+</span>
+      </div>
+    </div>
+
+    <div class="section-title">// COST PER METER OF PERIMETER</div>
+    <div class="breakdown">
+      <div class="bk-row"><span class="bk-label">Mech only</span><span class="bk-val" id="cpm-mech">$0.00</span></div>
+      <div class="bk-row bk-fiber"><span class="bk-label">+ Fiber layer</span><span class="bk-fiber" id="cpm-fiber">$0.00</span></div>
+      <div class="bk-row"><span class="bk-label">Full system</span><span class="bk-total" id="cpm-full">$0.00</span></div>
+    </div>
+
+    <div class="section-title">// REPLACEABILITY</div>
+    <div class="breakdown" style="font-size:10px; line-height:1.9;">
+      <div class="bk-row"><span class="bk-label">Replace 1 pole sensor</span><span class="bk-val">~$1–2</span></div>
+      <div class="bk-row"><span class="bk-label">Replace 1m fiber strand</span><span class="bk-val">~$0.03</span></div>
+      <div class="bk-row"><span class="bk-label">Replace controller</span><span class="bk-val">~$15</span></div>
+      <div class="bk-row"><span class="bk-label">Replace full outer mesh</span><span class="bk-val" id="replace-mesh">$0.00</span></div>
+      <div class="bk-row"><span style="color:var(--a)">Enemy cost per attack</span><span style="color:var(--a)">$400–1500</span></div>
+      <div class="bk-row"><span style="color:var(--p)">Your cost per defense</span><span style="color:var(--p)" id="cost-per-defense">$0.00</span></div>
+    </div>
+
+    <div class="tip" style="margin-top:0;">
+      <strong>RATIO:</strong> If this makes them spend even <strong>$500 more per attack</strong> to defeat it, and your whole rig costs less than that — you win economically every single time.
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+let scale = 'vehicle';
+let currency = 'usd';
+let units = 'm';
+let salvageMode = false;
+
+// Salvage substitution costs (replaces unitCost when salvageMode=true)
+// keyed by item name prefix
+const SALVAGE_OVERRIDES = {
+  'Raspberry Pi Zero': 0,       // use old phone / Arduino Nano clone $2
+  'MicroSD': 0,
+  'LiPo Battery': 0,
+  'Weatherproof Project Box': 0,
+  'Mild Steel Pole': 0,
+  'Signal Wire': 0,
+  'Plastic Optical Fiber': 0,
+  'Zip Ties': 0.01,
+};
+
+const SCALES = {
+  vehicle: { label:'VEHICLE RIG (~8m)', perimeter:8, poles:32 },
+  apc:     { label:'APC (~16m)',         perimeter:16, poles:56 },
+  tank:    { label:'TANK (~25m)',        perimeter:25, poles:80 },
+  road10:  { label:'ROAD PANEL 10m',    perimeter:10, poles:40 },
+  road50:  { label:'ROAD PANEL 50m',    perimeter:50, poles:200 },
+};
+
+const FX = { usd:1, eur:0.92, uah:41.5 };
+const SYM = { usd:'$', eur:'€', uah:'₴' };
+
+// BOM ITEMS — costs in USD, qty is a function of scale
+// qty: number OR function(scale) => number
+const BOM = {
+  mech: [
+    {
+      item: 'Steel Braided Cable Sleeving',
+      spec: '10–12mm diameter // 10m coil',
+      note: 'Woven tight around outer frame. Also acts as ground cage.',
+      src: 'Hardware / Amazon ~$0.50/m',
+      cat: 'cat-mech',
+      unitCost: 0.50,
+      unitLabel: '/m',
+      qty: s => s.perimeter * 1.3,
+      qtyLabel: s => `${(s.perimeter*1.3).toFixed(1)}m`,
+    },
+    {
+      item: 'Hex Mesh Cage / Bird Netting',
+      spec: '20–30mm hex aperture // galvanized steel',
+      note: 'Secondary physical defeat layer. Cheap galv. fencing.',
+      src: 'Farm supply / AliExpress ~$1/m²',
+      cat: 'cat-mech',
+      unitCost: 1.00,
+      unitLabel: '/m²',
+      qty: s => s.perimeter * 0.8,
+      qtyLabel: s => `${(s.perimeter*0.8).toFixed(1)}m²`,
+    },
+    {
+      item: 'Mild Steel Pole Stock (6mm)',
+      spec: '300–400mm per pole // weld or clamp to frame',
+      note: 'Each pole carries a sensor at its tip base.',
+      src: 'Local steel supplier ~$0.30/pole',
+      cat: 'cat-mech',
+      unitCost: 0.30,
+      unitLabel: '/pole',
+      qty: s => s.poles,
+      qtyLabel: s => `${s.poles} pcs`,
+    },
+    {
+      item: 'Zip Ties + Wire Lashing',
+      spec: 'UV-resistant nylon // 200mm length',
+      note: 'Bundle cables and fiber to mesh.',
+      src: 'Any hardware store ~$0.02 ea',
+      cat: 'cat-mech',
+      unitCost: 0.02,
+      unitLabel: '/tie',
+      qty: s => s.poles * 4,
+      qtyLabel: s => `${s.poles*4} pcs`,
+    },
+  ],
+  pole: [
+    {
+      item: 'PVDF Piezo Film Strip (FDT1-028K or equiv)',
+      spec: '28mm x 14mm // self-generating // 10μs response',
+      note: 'THE key sensor. Glue to pole base. No power needed.',
+      src: 'AliExpress bulk ~$0.80 ea',
+      cat: 'cat-mech',
+      unitCost: 0.80,
+      unitLabel: '/sensor',
+      qty: s => s.poles,
+      qtyLabel: s => `${s.poles} pcs`,
+    },
+    {
+      item: 'MCP3008 8-Ch SPI ADC',
+      spec: '10-bit // 200ksps // SPI // DIP-16',
+      note: 'One chip handles 8 pole sensors. Chain as needed.',
+      src: 'DigiKey / Adafruit ~$3.75 ea',
+      cat: 'cat-ctrl',
+      unitCost: 3.75,
+      unitLabel: '/chip',
+      qty: s => Math.ceil(s.poles / 8),
+      qtyLabel: s => `${Math.ceil(s.poles/8)} pcs`,
+    },
+    {
+      item: 'Signal Wire (2-conductor shielded)',
+      spec: '22AWG // shielded // sensor → controller',
+      note: 'Run from each pole base to central controller.',
+      src: 'Hardware / AliExpress ~$0.15/m',
+      cat: 'cat-mech',
+      unitCost: 0.15,
+      unitLabel: '/m',
+      qty: s => s.poles * 0.6,
+      qtyLabel: s => `${(s.poles*0.6).toFixed(1)}m`,
+    },
+    {
+      item: '100nF Decoupling Caps (bypass)',
+      spec: 'Ceramic // noise filter on ADC inputs',
+      note: 'One per channel. Prevents false triggers from RF.',
+      src: 'AliExpress bag of 100 ~$0.02 ea',
+      cat: 'cat-ctrl',
+      unitCost: 0.02,
+      unitLabel: '/cap',
+      qty: s => s.poles,
+      qtyLabel: s => `${s.poles} pcs`,
+    },
+  ],
+  fiber: [
+    {
+      item: 'Plastic Optical Fiber (POF) 1mm',
+      spec: 'PMMA core // 1mm OD // side-emit capable',
+      note: 'Weave through mesh. Scratch cladding for side emission. Reuse recovered FPV tether fiber in field.',
+      src: 'AliExpress ~$0.03/m',
+      cat: 'cat-fiber',
+      unitCost: 0.03,
+      unitLabel: '/m',
+      qty: s => s.perimeter * 2.5,
+      qtyLabel: s => `${(s.perimeter*2.5).toFixed(1)}m`,
+    },
+    {
+      item: 'PIN Photodiode BPW34 (or equiv)',
+      spec: '190–1100nm // ~1ns rise // 7mm² active area',
+      note: 'One per fiber zone (4–8 zones). Shielded box. This is the WWII-era tech — blazing fast.',
+      src: 'DigiKey / AliExpress ~$0.40 ea',
+      cat: 'cat-fiber',
+      unitCost: 0.40,
+      unitLabel: '/diode',
+      qty: s => Math.ceil(s.perimeter / 2),
+      qtyLabel: s => `${Math.ceil(s.perimeter/2)} pcs`,
+    },
+    {
+      item: '10kΩ Bias Resistor (TIA simplified)',
+      spec: 'Metal film // photodiode load resistor',
+      note: 'Simplest possible transimpedance amp. Good enough for flash detection.',
+      src: 'AliExpress bag of 100 ~$0.01 ea',
+      cat: 'cat-fiber',
+      unitCost: 0.01,
+      unitLabel: '/resistor',
+      qty: s => Math.ceil(s.perimeter / 2),
+      qtyLabel: s => `${Math.ceil(s.perimeter/2)} pcs`,
+    },
+    {
+      item: 'Fiber Crimp / Heat-Shrink Termination',
+      spec: 'Heat shrink + epoxy // DIY fiber end-face polish',
+      note: 'Sand fiber end with 600-grit then 2000-grit wet/dry. Free if you have sandpaper.',
+      src: 'Hardware store ~$0.05/termination',
+      cat: 'cat-fiber',
+      unitCost: 0.05,
+      unitLabel: '/end',
+      qty: s => Math.ceil(s.perimeter / 2) * 2,
+      qtyLabel: s => `${Math.ceil(s.perimeter/2)*2} pcs`,
+    },
+    {
+      item: 'Burst Disc (optional — brass shimstock)',
+      spec: '0.1mm brass shim // scores and pops on overpressure',
+      note: 'DIY: score with scalpel, clamp over fiber end. Mechanical overpressure → optical trigger.',
+      src: 'Hobby/model shop ~$0.10 ea DIY',
+      cat: 'cat-fiber',
+      unitCost: 0.10,
+      unitLabel: '/disc',
+      qty: s => Math.ceil(s.perimeter / 2),
+      qtyLabel: s => `${Math.ceil(s.perimeter/2)} pcs`,
+    },
+  ],
+  ctrl: [
+    {
+      item: 'Raspberry Pi Zero 2W',
+      spec: 'Quad-core 1GHz // 512MB // WiFi // $15 MSRP',
+      note: '🔄 SUBSTITUTE: Any old Android phone running Termux + Python. Free if you have one. Or Arduino Nano clone at $2.',
+      src: 'raspberrypi.com / Adafruit — $15',
+      cat: 'cat-ctrl',
+      unitCost: 15.00,
+      unitLabel: '/board',
+      qty: s => s.perimeter > 20 ? 2 : 1,
+      qtyLabel: s => `${s.perimeter > 20 ? 2 : 1} pcs`,
+    },
+    {
+      item: 'MicroSD Card (8GB min)',
+      spec: 'Class 10 // event log storage // JSON format',
+      note: '🔄 SUBSTITUTE: Any old phone SD card, USB drive, or even serial output to a laptop over USB.',
+      src: 'Amazon / any store ~$4',
+      cat: 'cat-ctrl',
+      unitCost: 4.00,
+      unitLabel: '/card',
+      qty: s => s.perimeter > 20 ? 2 : 1,
+      qtyLabel: s => `${s.perimeter > 20 ? 2 : 1} pcs`,
+    },
+    {
+      item: 'LiPo Battery Pack 5V 10000mAh',
+      spec: 'USB-C output // field portable power',
+      note: '🔄 SUBSTITUTE: 4x AA batteries + 5V boost converter (~$1). Car 12V + 7805 regulator. Dead drone battery + BMS board.',
+      src: 'Amazon ~$18',
+      cat: 'cat-ctrl',
+      unitCost: 18.00,
+      unitLabel: '/pack',
+      qty: s => s.perimeter > 20 ? 2 : 1,
+      qtyLabel: s => `${s.perimeter > 20 ? 2 : 1} pcs`,
+    },
+    {
+      item: 'Weatherproof Project Box (IP65)',
+      spec: '150x100x70mm // protects controller from elements',
+      note: '🔄 SUBSTITUTE: Old food container + silicone sealant around cable entries. Tupperware. Ammo can. Tin with lid.',
+      src: 'AliExpress ~$3.50',
+      cat: 'cat-ctrl',
+      unitCost: 3.50,
+      unitLabel: '/box',
+      qty: s => s.perimeter > 20 ? 2 : 1,
+      qtyLabel: s => `${s.perimeter > 20 ? 2 : 1} pcs`,
+    },
+    {
+      item: 'Solder + PCB Stripboard + misc',
+      spec: 'Consumables // wires // connectors',
+      note: '🔄 SUBSTITUTE: Twist-and-tape wire joints work for testing. Stripboard from any dead consumer electronics PCB.',
+      src: 'Any electronics store ~$5 flat',
+      cat: 'cat-ctrl',
+      unitCost: 5.00,
+      unitLabel: 'flat',
+      qty: s => 1,
+      qtyLabel: s => '1 lot',
+    },
+  ],
+
+  // SALVAGE / ZERO COST organic substitutions
+  salvage: [
+    {
+      item: 'FPV Fiber Tether (field-recovered)',
+      spec: 'Single-mode 250μm // stripped from downed drone tether',
+      note: '💀 LITERALLY FREE in Ukraine. Spider-web towns = free fiber everywhere. Strip outer jacket, use inner glass.',
+      src: '⚠ Field recovery — $0.00',
+      cat: 'cat-fiber',
+      unitCost: 0.00,
+      unitLabel: '/m',
+      qty: s => s.perimeter * 2.5,
+      qtyLabel: s => `${(s.perimeter*2.5).toFixed(1)}m SALVAGE`,
+    },
+    {
+      item: 'Salvaged Speaker / Buzzer Piezo Disc',
+      spec: '27–35mm brass disc // from any old buzzer or smoke alarm',
+      note: 'Crack open any dead smoke alarm, greeting card, toy, or kitchen timer. Piezo disc inside. Works as impact sensor.',
+      src: '⚠ Salvage electronics — ~$0.00',
+      cat: 'cat-mech',
+      unitCost: 0.00,
+      unitLabel: '/disc',
+      qty: s => Math.floor(s.poles * 0.3),
+      qtyLabel: s => `~${Math.floor(s.poles*0.3)} salvage`,
+    },
+    {
+      item: 'Old Ethernet / Cat5 Cable (wire source)',
+      spec: '8-conductor 24AWG // strip and repurpose individual wires',
+      note: 'One Cat5 cable = 8 sensor wires. Shielded variety even better. Found everywhere in rubble.',
+      src: '⚠ Salvage / dumpster — ~$0.00',
+      cat: 'cat-mech',
+      unitCost: 0.00,
+      unitLabel: 'lot',
+      qty: s => Math.ceil(s.poles / 8),
+      qtyLabel: s => `${Math.ceil(s.poles/8)} cables`,
+    },
+    {
+      item: 'Dead Drone / Electronics — Resistors & Caps',
+      spec: 'SMD 0402/0603 // desolder from dead PCBs',
+      note: 'Any dead drone, phone, router = resistor/cap farm. Hot air gun or careful soldering iron lifts them.',
+      src: '⚠ Salvage PCBs — ~$0.00',
+      cat: 'cat-ctrl',
+      unitCost: 0.00,
+      unitLabel: 'lot',
+      qty: s => 1,
+      qtyLabel: s => '1 lot salvage',
+    },
+    {
+      item: 'Window Screen / Metal Fly Screen',
+      spec: 'Galvanized steel mesh // fine aperture',
+      note: 'Window screen mesh = free fine mesh layer. Stretches over frame, acts as second defeat screen AND antenna ground plane.',
+      src: '⚠ Salvage / hardware ~$0.20/m²',
+      cat: 'cat-mech',
+      unitCost: 0.20,
+      unitLabel: '/m²',
+      qty: s => s.perimeter * 0.5,
+      qtyLabel: s => `${(s.perimeter*0.5).toFixed(1)}m²`,
+    },
+    {
+      item: 'Coat Hanger / Rebar Wire (pole stock)',
+      spec: '3–4mm mild steel // bent to shape // free',
+      note: 'Steel coat hanger = perfect pole stock. Cut to length, bend 90° base tab, weld or clamp. Literally from any closet.',
+      src: '⚠ Salvage — $0.00',
+      cat: 'cat-mech',
+      unitCost: 0.00,
+      unitLabel: '/pole',
+      qty: s => Math.floor(s.poles * 0.5),
+      qtyLabel: s => `~${Math.floor(s.poles*0.5)} salvage`,
+    },
+    {
+      item: 'Hot Glue / Epoxy (sensor bonding)',
+      spec: 'Any 2-part epoxy or hot glue gun',
+      note: 'Bond PVDF film to pole base. Hot glue works fine for testing. Epoxy for field permanence. Both from any hardware store.',
+      src: 'Hardware store ~$2 per stick pack',
+      cat: 'cat-struct',
+      unitCost: 2.00,
+      unitLabel: 'flat',
+      qty: s => 1,
+      qtyLabel: s => '1 pack',
+    },
+    {
+      item: 'Bicycle Inner Tube (weatherproofing)',
+      spec: 'Cut into strips // wrap connection points',
+      note: 'Self-amalgamating rubber. Cut strips of dead inner tube wrap solder joints. Free from any bike shop scrap bin.',
+      src: '⚠ Salvage / bike shop — ~$0.00',
+      cat: 'cat-struct',
+      unitCost: 0.00,
+      unitLabel: 'lot',
+      qty: s => 1,
+      qtyLabel: s => '1 tube',
+    },
+  ],
+};
+
+// ── RENDER ──
+function fmt(usd) {
+  const v = usd * FX[currency];
+  return SYM[currency] + v.toFixed(2);
+}
+function fmtLen(meters) {
+  if (units === 'ft') return (meters * 3.28084).toFixed(1) + 'ft';
+  return meters.toFixed(1) + 'm';
+}
+
+function getEffectiveCost(item) {
+  if (!salvageMode) return item.unitCost;
+  for (const key of Object.keys(SALVAGE_OVERRIDES)) {
+    if (item.item.startsWith(key)) return SALVAGE_OVERRIDES[key];
+  }
+  return item.unitCost;
+}
+
+function renderTable(tbodyId, items) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  let total = 0;
+  const sc = SCALES[scale];
+  items.forEach(item => {
+    const qty = item.qty(sc);
+    const cost = getEffectiveCost(item);
+    const line = qty * cost;
+    total += line;
+    const salvaged = salvageMode && cost < item.unitCost;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="${item.cat}" ${salvaged ? 'style="opacity:0.7"' : ''}>
+        <div class="item">${item.item} ${salvaged ? '<span style="color:var(--r);font-size:9px;">[SALVAGE/FREE]</span>' : ''}</div>
+        <div class="spec">${item.spec}</div>
+        <div class="note">${item.note}</div>
+        <div class="src">${item.src}</div>
+      </td>
+      <td class="qty">${item.qtyLabel(sc)}</td>
+      <td class="unit-cost">${salvaged ? '<span style="color:var(--r)">FREE</span>' : fmt(cost)}<br><span style="font-size:9px;color:var(--pd)">${item.unitLabel}</span></td>
+      <td class="line-cost" ${salvaged ? 'style="color:var(--r)"' : ''}>${salvaged ? '$0.00' : fmt(line)}</td>
+      <td>
+        <div style="font-size:9px;color:var(--fd);">${item.src.split('~')[0].trim()}</div>
+        <div style="font-size:9px;color:var(--a);">${item.src.includes('~') ? '~'+item.src.split('~')[1] : ''}</div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  return total;
+}
+
+function recalc() {
+  const sc = SCALES[scale];
+  const mechT = renderTable('bom-mech', BOM.mech);
+  const poleT = renderTable('bom-pole', BOM.pole);
+  const fiberT = renderTable('bom-fiber', BOM.fiber);
+  const ctrlT = renderTable('bom-ctrl', BOM.ctrl);
+  renderTable('bom-salvage', BOM.salvage); // salvage is $0 — shown for reference, not added to grand
+  const grand = mechT + poleT + fiberT + ctrlT;
+
+  // Summary
+  document.getElementById('sum-mech').textContent = fmt(mechT);
+  document.getElementById('sum-pole').textContent = fmt(poleT);
+  document.getElementById('sum-fiber').textContent = fmt(fiberT);
+  document.getElementById('sum-ctrl').textContent = fmt(ctrlT);
+  document.getElementById('sum-total').textContent = fmt(grand);
+  document.getElementById('sum-permeter').textContent = fmt(grand / sc.perimeter) + '/' + (units==='ft'?'ft':'m');
+  document.getElementById('grandTotal').textContent = fmt(grand);
+  document.getElementById('grandLabel').textContent = 'TOTAL // ' + sc.label.toUpperCase() + (salvageMode ? ' // MAX SALVAGE' : '');
+  document.getElementById('hdrTotal').textContent = fmt(grand);
+  document.getElementById('salvage-note').style.display = salvageMode ? 'flex' : 'none';
+
+  // Cost per meter
+  const mechOnly = (mechT + poleT) / sc.perimeter;
+  const fiberPer = fiberT / sc.perimeter;
+  document.getElementById('cpm-mech').textContent = fmt(mechOnly) + '/' + (units==='ft'?'ft':'m');
+  document.getElementById('cpm-fiber').textContent = '+' + fmt(fiberPer) + '/' + (units==='ft'?'ft':'m');
+  document.getElementById('cpm-full').textContent = fmt(grand / sc.perimeter) + '/' + (units==='ft'?'ft':'m');
+
+  // Comparison bar
+  const maxRef = 1000000;
+  const pct = Math.min((grand / maxRef) * 100, 100);
+  document.getElementById('bar-this').style.width = Math.max(pct * 6, 2) + '%';
+  document.getElementById('cmp-this').textContent = fmt(grand);
+
+  // Replaceability
+  const meshCost = BOM.mech[0].qty(sc) * BOM.mech[0].unitCost + BOM.mech[1].qty(sc) * BOM.mech[1].unitCost;
+  document.getElementById('replace-mesh').textContent = fmt(meshCost);
+  document.getElementById('cost-per-defense').textContent = fmt(grand / Math.max(sc.poles / 4, 1));
+}
+
+function setScale(s) {
+  scale = s;
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('scl-'+s).classList.add('active');
+  recalc();
+}
+
+function setCurrency(c) {
+  currency = c;
+  document.querySelectorAll('[id^="ut-"]').forEach(b => b.classList.remove('on'));
+  document.getElementById('ut-'+c).classList.add('on');
+  recalc();
+}
+
+function setSalvage(on) {
+  salvageMode = on;
+  document.getElementById('ut-new').classList.toggle('on', !on);
+  document.getElementById('ut-salvage').classList.toggle('on', on);
+  recalc();
+}
+
+function setUnits(u) {
+  units = u;
+  document.getElementById('ut-m').classList.toggle('on', u==='m');
+  document.getElementById('ut-ft').classList.toggle('on', u==='ft');
+  recalc();
+}
+
+recalc();
+</script>
+</body>
+</html>
